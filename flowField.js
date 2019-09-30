@@ -9,13 +9,15 @@ let ROWS;
 let particles = [];
 let flowField = [];
 
+let hues = [];
+
 let fr;
 
 function setup() {
     createCanvas(1080, 720);
-    pixelDensity(1);
 
-    background(255);
+    colorMode(HSB, 255);
+    background(30);
 
     COLS = floor(width / SCALE);
     ROWS = floor(height / SCALE);
@@ -25,6 +27,10 @@ function setup() {
     }
 
     flowField = new Array(COLS*ROWS);
+    hues = new Array(width*height);
+    for (const i of Array(hues.length).keys()) {
+        hues[i] = 255;
+    }
 
     fr = createP('');
 }
@@ -83,7 +89,16 @@ class Particle {
     }
 
     show() {
-        stroke(0, 5);
+        let index = floor(this.pos.x) + floor(this.pos.y) * width;
+        if (index >= hues.length) {
+            index = hues.length - 1;
+        } else if (index < 0) {
+            index = 0;
+        }
+
+        const h = max(hues[index] - 10, 120);
+        hues[index]  = h;
+        stroke(h, 255, 255, 5);
         strokeWeight(1);
         line(this.prevPos.x, this.prevPos.y, this.pos.x, this.pos.y);
     }
@@ -103,14 +118,6 @@ function draw() {
             v.setMag(2);
             flowField[index] = v;
 
-            // stroke(0, 50);
-            // strokeWeight(1);
-            // push();
-            // translate(x*SCALE, y*SCALE);
-            // rotate(v.heading());
-            // line(0, 0, SCALE, 0);
-            // pop();
-
             xOffset += INCR;
         }
         yOffset += INCR;
@@ -125,6 +132,6 @@ function draw() {
     zOffset += INCR/5;
 
     if (frameCount % 5 == 0) {
-        fr.html(floor(frameRate()));
+        fr.html('FPS: ' + floor(frameRate()));
     }
 }
