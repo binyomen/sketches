@@ -28,7 +28,7 @@ function randomColor() {
         color(170, 198, 166),
     ];
 
-    return PALETTE[parseInt(random(PALETTE.length))];
+    return random(PALETTE);
 }
 
 function draw() {
