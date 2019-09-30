@@ -136,8 +136,8 @@ let n2 = 0;
 function draw() {
     background(51);
 
-    delta = ((sin(n1) + 1) / 2) * 25;
-    angle = ((sin(n2) + 1) / 2) * HALF_PI;
+    delta = map(sin(n1), -1, 1, 0, 25);
+    angle = map(sin(n2), -1, 1, 0, HALF_PI);
 
     for (const poly of polys) {
         poly.hankin();
