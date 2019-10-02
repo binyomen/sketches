@@ -1,6 +1,7 @@
 const NUM_ROPES = 7;
 const NOISE_FACTOR = 0.01;
-const STRAND_OFFSET = 20;
+const STRAND_POS_OFFSET_RANGE = 20;
+let STRAND_ANGLE_OFFSET_RANGE;
 
 let ropes = [];
 
@@ -10,6 +11,8 @@ function setup() {
     createCanvas(800, 500);
 
     background(30);
+
+    STRAND_ANGLE_OFFSET_RANGE = PI / 12;
 
     for (const i of Array(NUM_ROPES).keys()) {
         // evenly space the ropes.
@@ -27,14 +30,14 @@ class Rope {
         this.direction = this.generateDirection();
         this.r = 10;
 
-        this.color = color(random(70, 255), random(70, 255), random(70, 255));
+        this.color = color(random(70, 255), random(70, 255), random(70, 255), 40);
 
         this.points = [];
 
         this.id = random(10000);
 
         this.strands = [];
-        for (const i of Array(5).keys()) {
+        for (const i of Array(100).keys()) {
             this.strands.push(new Strand(this));
         }
     }
@@ -83,9 +86,11 @@ class Strand {
         this.rope = rope;
 
         this.pos = this.rope.pos.copy();
-        this.pos.x += random(-STRAND_OFFSET, STRAND_OFFSET);
+        this.pos.x += random(-STRAND_POS_OFFSET_RANGE, STRAND_POS_OFFSET_RANGE);
 
         this.vel = createVector(0, -1);
+        this.vel.rotate(random(-STRAND_ANGLE_OFFSET_RANGE, STRAND_ANGLE_OFFSET_RANGE));
+
         this.acc = createVector(0, 0);
 
         this.maxSpeed = 1;
