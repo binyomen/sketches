@@ -124,29 +124,29 @@ class Grid {
         this.w = w;
         this.h = h;
 
-        this.dict = {};
+        this.symbols = {};
         this.droppers = [];
     }
 
+    asKey(x, y) {
+        return x + "," + y;
+    }
+
     getSymbol(x, y) {
-        if (x in this.dict && y in this.dict[x]) {
-            return this.dict[x][y];
+        if (this.asKey(x, y) in this.symbols) {
+            return this.symbols[this.asKey(x, y)];
         } else {
             return null;
         }
     }
 
     createSymbol(x, y) {
-        if (!(x in this.dict)) {
-            this.dict[x] = {};
-        }
-
-        this.dict[x][y] = new Symbol(x, y);
-        return this.dict[x][y];
+        this.symbols[this.asKey(x, y)] = new Symbol(x, y);
+        return this.symbols[this.asKey(x, y)];
     }
 
     removeSymbol(x, y) {
-        delete this.dict[x][y];
+        delete this.symbols[this.asKey(x, y)];
     }
 
     getHeight() {
@@ -158,10 +158,8 @@ class Grid {
     }
 
     update() {
-        for (const x in this.dict) {
-            for (const y in this.dict[x]) {
-                this.dict[x][y].update();
-            }
+        for (const key in this.symbols) {
+            this.symbols[key].update();
         }
 
         for (const dropper of this.droppers) {
@@ -170,10 +168,8 @@ class Grid {
     }
 
     draw() {
-        for (const x in this.dict) {
-            for (const y in this.dict[x]) {
-                this.dict[x][y].draw();
-            }
+        for (const key in this.symbols) {
+            this.symbols[key].draw();
         }
     }
 }
