@@ -354,6 +354,7 @@ name = "de_jong_ifs"
 version = "0.1.0"
 dependencies = [
  "nannou 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nannou_utils 0.1.0",
 ]
 
 [[package]]
@@ -775,6 +776,14 @@ dependencies = [
  "vulkano-win 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "walkdir 2.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "winit 0.19.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "nannou_utils"
+version = "0.1.0"
+dependencies = [
+ "nannou 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vulkano 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

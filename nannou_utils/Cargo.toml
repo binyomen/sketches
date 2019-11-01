@@ -1,9 +1,9 @@
 [package]
-name = "de_jong_ifs"
+name = "nannou_utils"
 version = "0.1.0"
 authors = ["Ben Weedon <ben@weedon.email>"]
 edition = "2018"
 
 [dependencies]
 nannou = "0.11.1"
-nannou_utils = { path = "../nannou_utils" }
+vulkano = "0.14.0"
