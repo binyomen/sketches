@@ -1,12 +1,16 @@
 use nannou::image::{self, RgbaImage};
+use rand::Rng;
 use std::cell::RefCell;
 
-pub const WIDTH: usize = 300;
-pub const HEIGHT: usize = 300;
+pub const WIDTH: usize = 500;
+pub const HEIGHT: usize = 500;
 pub const DPI: f32 = 2.0;
 const GRID_W: usize = (WIDTH as f32 * DPI / SCALE as f32) as usize;
 const GRID_H: usize = (HEIGHT as f32 * DPI / SCALE as f32) as usize;
-const SCALE: usize = 10;
+const SCALE: usize = 1;
+
+const NUM_DROPS: usize = 2000;
+const DROP_SIZE: usize = 10;
 
 const DIFFUSION_RATE_A: f32 = 1.0;
 const DIFFUSION_RATE_B: f32 = 0.5;
@@ -34,9 +38,15 @@ impl Grid {
             cols.push(col);
         }
 
-        for x in 0..20 {
-            for y in 0..20 {
-                cols[GRID_W / 2 + x - 10][GRID_H / 2 + y - 10].b = 1.0;
+        // seed the chemical solution
+        let mut rng = rand::thread_rng();
+        for _ in 0..NUM_DROPS {
+            let x = rng.gen_range(0, GRID_W - DROP_SIZE);
+            let y = rng.gen_range(0, GRID_H - DROP_SIZE);
+            for i in 0..DROP_SIZE {
+                for j in 0..DROP_SIZE {
+                    cols[x + i][y + j].b = 1.0;
+                }
             }
         }
 

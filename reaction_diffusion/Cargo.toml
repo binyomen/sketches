@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 nannou = "0.11.1"
 nannou_utils = { path = "../nannou_utils" }
+rand = "0.7.2"
