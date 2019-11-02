@@ -67,7 +67,7 @@ impl Grid {
             }
         }
 
-        self.cols = self.next_cols.borrow().clone();
+        std::mem::swap(&mut self.cols, &mut *self.next_cols.borrow_mut());
     }
 
     pub fn view(&self, mut img: &mut RgbaImage) {
