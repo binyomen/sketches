@@ -23,19 +23,24 @@ const ADJACENT_WEIGHT: f32 = 0.2;
 const DIAGONAL_WEIGHT: f32 = 0.05;
 
 pub struct Grid {
-    cols: Vec<Vec<Cell>>,
-    next_cols: RefCell<Vec<Vec<Cell>>>,
+    cells: Vec<Cell>,
+    next_cells: RefCell<Vec<Cell>>,
+}
+
+fn index_to_xy(index: usize) -> (usize, usize) {
+    (index % GRID_W, index / GRID_W)
+}
+
+fn xy_to_index(x: usize, y: usize) -> usize {
+    x + y * GRID_W
 }
 
 impl Grid {
     pub fn new() -> Self {
-        let mut cols = Vec::with_capacity(GRID_W);
-        for x in 0..GRID_W {
-            let mut col = Vec::with_capacity(GRID_H);
-            for y in 0..GRID_H {
-                col.push(Cell::new(x, y));
-            }
-            cols.push(col);
+        let mut cells = Vec::with_capacity(GRID_W * GRID_H);
+        for i in 0..cells.capacity() {
+            let (x, y) = index_to_xy(i);
+            cells.push(Cell::new(x, y));
         }
 
         // seed the chemical solution
@@ -45,36 +50,32 @@ impl Grid {
             let y = rng.gen_range(0, GRID_H - DROP_SIZE);
             for i in 0..DROP_SIZE {
                 for j in 0..DROP_SIZE {
-                    cols[x + i][y + j].b = 1.0;
+                    cells[xy_to_index(x + i, y + j)].b = 1.0;
                 }
             }
         }
 
         Grid {
-            cols: cols.clone(),
-            next_cols: RefCell::new(cols),
+            cells: cells.clone(),
+            next_cells: RefCell::new(cells),
         }
     }
 
     fn get_value(&self, x: usize, y: usize, get: &(dyn Fn(&Cell) -> f32)) -> f32 {
-        get(&self.cols[x][y])
+        get(&self.cells[xy_to_index(x, y)])
     }
 
     pub fn update(&mut self) {
-        for col in &mut *self.next_cols.borrow_mut() {
-            for cell in col {
-                cell.update(self);
-            }
+        for cell in &mut *self.next_cells.borrow_mut() {
+            cell.update(self);
         }
 
-        std::mem::swap(&mut self.cols, &mut *self.next_cols.borrow_mut());
+        std::mem::swap(&mut self.cells, &mut *self.next_cells.borrow_mut());
     }
 
     pub fn view(&self, mut img: &mut RgbaImage) {
-        for col in &self.cols {
-            for cell in col {
-                cell.view(&mut img);
-            }
+        for cell in &self.cells {
+            cell.view(&mut img);
         }
     }
 }
