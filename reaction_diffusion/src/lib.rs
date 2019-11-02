@@ -1,10 +1,12 @@
-use nannou::{draw::Draw, prelude::*};
-
+use nannou::image::{self, RgbaImage};
 use std::cell::RefCell;
 
-pub const WIDTH: usize = 100;
-pub const HEIGHT: usize = 100;
-const SCALE: usize = 1;
+pub const WIDTH: usize = 300;
+pub const HEIGHT: usize = 300;
+pub const DPI: f32 = 2.0;
+const GRID_W: usize = (WIDTH as f32 * DPI / SCALE as f32) as usize;
+const GRID_H: usize = (HEIGHT as f32 * DPI / SCALE as f32) as usize;
+const SCALE: usize = 10;
 
 const DIFFUSION_RATE_A: f32 = 1.0;
 const DIFFUSION_RATE_B: f32 = 0.5;
@@ -23,18 +25,18 @@ pub struct Grid {
 
 impl Grid {
     pub fn new() -> Self {
-        let mut cols = Vec::with_capacity(WIDTH / SCALE);
-        for x in 0..(WIDTH / SCALE) {
-            let mut col = Vec::with_capacity(HEIGHT / SCALE);
-            for y in 0..(HEIGHT / SCALE) {
+        let mut cols = Vec::with_capacity(GRID_W);
+        for x in 0..GRID_W {
+            let mut col = Vec::with_capacity(GRID_H);
+            for y in 0..GRID_H {
                 col.push(Cell::new(x, y));
             }
             cols.push(col);
         }
 
-        for x in 0..10 {
-            for y in 0..10 {
-                cols[(WIDTH / SCALE) / 2 + x - 5][(HEIGHT / SCALE) / 2 + y - 5].b = 1.0;
+        for x in 0..20 {
+            for y in 0..20 {
+                cols[GRID_W / 2 + x - 10][GRID_H / 2 + y - 10].b = 1.0;
             }
         }
 
@@ -58,10 +60,10 @@ impl Grid {
         self.cols = self.next_cols.borrow().clone();
     }
 
-    pub fn view(&self, draw: &Draw) {
+    pub fn view(&self, mut img: &mut RgbaImage) {
         for col in &self.cols {
             for cell in col {
-                cell.view(draw);
+                cell.view(&mut img);
             }
         }
     }
@@ -88,17 +90,15 @@ impl Cell {
     }
 
     fn get_adjacent(&self, grid: &Grid, get: &(dyn Fn(&Cell) -> f32)) -> Vec<f32> {
-        const H: usize = HEIGHT / SCALE;
-        const W: usize = WIDTH / SCALE;
         let x = self.x;
         let y = self.y;
 
         let mut neighbors = vec![];
 
-        if y + 1 < H {
+        if y + 1 < GRID_H {
             neighbors.push(grid.get_value(x, y + 1, &get));
         }
-        if x + 1 < W {
+        if x + 1 < GRID_W {
             neighbors.push(grid.get_value(x + 1, y, &get));
         }
         if y > 0 {
@@ -112,23 +112,21 @@ impl Cell {
     }
 
     fn get_diagonal(&self, grid: &Grid, get: &(dyn Fn(&Cell) -> f32)) -> Vec<f32> {
-        const H: usize = HEIGHT / SCALE;
-        const W: usize = WIDTH / SCALE;
         let x = self.x;
         let y = self.y;
 
         let mut neighbors = vec![];
 
-        if x + 1 < W && y + 1 < H {
+        if x + 1 < GRID_W && y + 1 < GRID_H {
             neighbors.push(grid.get_value(x + 1, y + 1, &get));
         }
-        if x + 1 < W && y > 0 {
+        if x + 1 < GRID_W && y > 0 {
             neighbors.push(grid.get_value(x + 1, y - 1, &get));
         }
         if x > 0 && y > 0 {
             neighbors.push(grid.get_value(x - 1, y - 1, &get));
         }
-        if x > 0 && y + 1 < H {
+        if x > 0 && y + 1 < GRID_H {
             neighbors.push(grid.get_value(x - 1, y + 1, &get));
         }
 
@@ -166,17 +164,22 @@ impl Cell {
         self.b = b + ((DB * lb) + (a * b * b) - ((K + F) * b)) * T;
     }
 
-    fn view(&self, draw: &Draw) {
-        let screen_x = (self.x * SCALE) as f32 - (WIDTH as f32 / 2.0);
-        let screen_y = (self.y * SCALE) as f32 - (HEIGHT as f32 / 2.0);
+    fn view(&self, img: &mut RgbaImage) {
+        let x = self.x * SCALE;
+        let y = self.y * SCALE;
 
-        let c = self.a - self.b;
+        let difference = self.a - self.b;
+        let color = if difference < 0.0 {
+            0
+        } else {
+            (difference * 255.0) as u8
+        };
+        let pixel = image::Rgba([color, color, color, 255]);
 
-        let color = rgb(c, c, c);
-
-        draw.rect()
-            .x_y(screen_x, screen_y)
-            .w_h(SCALE as f32, SCALE as f32)
-            .color(color);
+        for i in 0..SCALE {
+            for j in 0..SCALE {
+                img.put_pixel((x + i) as u32, (y + j) as u32, pixel);
+            }
+        }
     }
 }

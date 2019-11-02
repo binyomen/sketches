@@ -1,8 +1,11 @@
 // Based on https://www.youtube.com/watch?v=BV9ny785UNc
 
-use nannou::prelude::*;
-
-use reaction_diffusion::{Grid, HEIGHT, WIDTH};
+use nannou::{
+    image::{ImageBuffer, RgbaImage},
+    prelude::*,
+};
+use reaction_diffusion::{Grid, DPI, HEIGHT, WIDTH};
+use std::cell::RefCell;
 
 fn main() {
     nannou::app(model).update(update).view(view).run();
@@ -10,6 +13,7 @@ fn main() {
 
 struct Model {
     grid: Grid,
+    img: RefCell<RgbaImage>,
 }
 
 fn model(app: &App) -> Model {
@@ -19,7 +23,12 @@ fn model(app: &App) -> Model {
         .build()
         .unwrap();
 
-    Model { grid: Grid::new() }
+    let img: RgbaImage =
+        ImageBuffer::new((WIDTH as f32 * DPI) as u32, (HEIGHT as f32 * DPI) as u32);
+    Model {
+        grid: Grid::new(),
+        img: RefCell::new(img),
+    }
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {
@@ -30,9 +39,6 @@ fn update(app: &App, model: &mut Model, _update: Update) {
 }
 
 fn view(app: &App, model: &Model, frame: &Frame) {
-    let draw = app.draw();
-
-    model.grid.view(&draw);
-
-    draw.to_frame(&app, &frame).unwrap();
+    model.grid.view(&mut *model.img.borrow_mut());
+    nannou_utils::draw_image(&*model.img.borrow(), DPI, app, frame);
 }

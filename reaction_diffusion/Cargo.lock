@@ -771,6 +771,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "nannou_utils"
+version = "0.1.0"
+dependencies = [
+ "nannou 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vulkano 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "nix"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1368,6 +1376,7 @@ name = "reaction_diffusion"
 version = "0.1.0"
 dependencies = [
  "nannou 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nannou_utils 0.1.0",
 ]
 
 [[package]]
