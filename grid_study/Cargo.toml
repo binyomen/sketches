@@ -1,0 +1,10 @@
+[package]
+name = "grid_study"
+version = "0.1.0"
+authors = ["Ben Weedon <ben@weedon.email>"]
+edition = "2018"
+
+[dependencies]
+lazy_static = "1.4.0"
+nannou = "0.11.1"
+rand = "0.7.2"
