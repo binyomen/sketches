@@ -17,17 +17,33 @@ const STRAND_POS_OFFSET_RANGE: f32 = 20.0;
 const STRAND_ANGLE_OFFSET_RANGE: f32 = PI / 12.0;
 const NUM_STRANDS: usize = 100;
 const ROPE_RADIUS: f32 = 10.0;
-const STRAND_MAX_SPEED: f32 = 1.0;
+const STRAND_MAX_SPEED: f32 = 2.0;
 const STRAND_MAX_FORCE: f32 = 0.03;
+const SKEW_FACTOR: f64 = 0.5;
+
+fn skew_noise(noise_value: f64) -> f64 {
+    let dist = noise_value.abs();
+    let skew = dist * SKEW_FACTOR;
+
+    if noise_value < 0.0 {
+        noise_value + skew
+    } else {
+        noise_value - skew
+    }
+}
 
 fn generate_direction(noise: &mut Box<dyn NoiseFn<[f64; 3]>>, x: f32, y: f32, id: u32) -> Vector2 {
-    let angle = noise.get([
+    let noise_value = noise.get([
         (x * NOISE_FACTOR) as f64,
         (y * NOISE_FACTOR) as f64,
         id as f64,
-    ]) as f32
-        * PI
-        * 2.0;
+    ]);
+    let noise_value = skew_noise(noise_value);
+    let angle = map_range(noise_value, -1.0, 1.0, 0.0, 2.0 * PI);
+
+    // Our noise tends towards 0, which means the ropes will move left. Rotate
+    // the angle so it points up instead.
+    let angle = angle - (PI / 2.0);
 
     vec2(angle.cos(), angle.sin()).normalize()
 }
@@ -71,18 +87,7 @@ impl Rope {
         self.prev = self.pos;
         self.points.push(self.prev);
 
-        let actual_direction = self.direction;
-
-        // Perlin noise tends towards 0.5, which means the ropes will move left.
-        // Rotate the direction so it moves up instead.
-        let rot: Basis2<f32> = Rotation2::from_angle(Rad(PI / 2.0));
-        let actual_direction =
-            rot.rotate_vector(cgmath::Vector2::new(actual_direction.x, actual_direction.y));
-
-        self.pos = pt2(
-            self.pos.x + actual_direction.x,
-            self.pos.y + actual_direction.y,
-        );
+        self.pos = pt2(self.pos.x + self.direction.x, self.pos.y + self.direction.y);
 
         self.direction = generate_direction(noise, self.pos.x, self.pos.y, self.id);
 
