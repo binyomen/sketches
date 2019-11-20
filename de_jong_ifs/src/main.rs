@@ -60,7 +60,7 @@ fn view(app: &App, _model: &Model, frame: &Frame) {
         current_point = ifs(current_point);
     }
 
-    nannou_utils::draw_image(&img, dpi, &app, &frame);
+    nannou_utils::draw_image(&img, dpi, app, frame);
 }
 
 fn ifs(p: Vector2) -> Vector2 {

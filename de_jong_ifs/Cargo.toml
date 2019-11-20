@@ -5,5 +5,5 @@ authors = ["Ben Weedon <ben@weedon.email>"]
 edition = "2018"
 
 [dependencies]
-nannou = "0.11.1"
+nannou = "0.12.0"
 nannou_utils = { path = "../nannou_utils" }
