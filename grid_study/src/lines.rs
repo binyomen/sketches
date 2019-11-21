@@ -94,7 +94,6 @@ fn gen_lines_in_direction(angle: f32, sq: &Square, direction: Vector2, _draw: &D
 }
 
 fn gen_line(p: Point2<f32>, angle: f32, sq: &Square) -> Option<Line> {
-    // Generate a vector that
     let v1 = vec_from_angle(angle);
     let v1 = confine_to_square(p, v1, sq);
     let v1 = match v1 {
