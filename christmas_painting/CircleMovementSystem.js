@@ -1,5 +1,5 @@
 const NUM_PARTICLES = 50;
-const RADIUS = 10;
+const RADIUS = 7;
 const SPEED = 10;
 
 class CircleMovementSystem {
