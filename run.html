@@ -5,15 +5,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
     <script>
-        const sketchPath = location.hash.substring(1);
+        let args;
+        (function() {
+          const hash = location.hash.substring(1);
+          const tokens = hash.split(',');
 
-        let titleTag = document.createElement('title');
-        titleTag.innerText = sketchPath;
-        document.head.appendChild(titleTag);
+          const sketchPath = tokens[0];
+          args = tokens.slice(1);
 
-        let scriptTag = document.createElement('script');
-        scriptTag.setAttribute('src', sketchPath);
-        document.head.appendChild(scriptTag);
+          let titleTag = document.createElement('title');
+          titleTag.innerText = sketchPath;
+          document.head.appendChild(titleTag);
+
+          let scriptTag = document.createElement('script');
+          scriptTag.setAttribute('src', sketchPath);
+          document.head.appendChild(scriptTag);
+        })();
     </script>
   </head>
   <body>
