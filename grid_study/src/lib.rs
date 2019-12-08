@@ -1,6 +1,7 @@
 use nannou::{prelude::*, Draw};
 
 mod basic_squares;
+mod cubbies;
 mod lines;
 
 pub const WIDTH: u32 = 800;
@@ -10,6 +11,7 @@ pub const CELL_SIZE: f32 = 50.0;
 pub enum Mode {
     BasicSquares,
     Lines,
+    Cubbies,
 }
 
 impl Mode {
@@ -17,6 +19,7 @@ impl Mode {
         match self {
             Mode::BasicSquares => LoopMode::loop_once(),
             Mode::Lines => LoopMode::loop_once(),
+            Mode::Cubbies => LoopMode::loop_once(),
         }
     }
 
@@ -24,6 +27,7 @@ impl Mode {
         match self {
             Mode::BasicSquares => basic_squares::draw,
             Mode::Lines => lines::draw,
+            Mode::Cubbies => cubbies::draw,
         }
     }
 }
@@ -33,6 +37,7 @@ impl From<String> for Mode {
         match s.to_lowercase().as_ref() {
             "basicsquares" => Mode::BasicSquares,
             "lines" => Mode::Lines,
+            "cubbies" => Mode::Cubbies,
             _ => unreachable!(),
         }
     }
