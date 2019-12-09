@@ -8,8 +8,10 @@ class CircleMovementSystem {
 
         this.particles = [];
         for (const i of Array(NUM_PARTICLES).keys()) {
-            this.particles.push(new Particle(width/2, height/2));
+            this.particles.push(new Particle(random(width), random(height)));
         }
+
+        setMaxElementsSvg(20000);
     }
 
     update() {

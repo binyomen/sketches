@@ -15,19 +15,23 @@ function limitSvgElements() {
     }
 }
 
-function createCanvasSvg(width, height, maxElements) {
+function createCanvasSvg(width, height) {
     removeP5Canvas();
 
     const svgElt = document.createElementNS(svgns, 'svg');
     svgElt.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
     svgElt.setAttribute('height', height);
-    svgElt.setAttribute('data-max-elements', maxElements);
     svgElt.id = 'canvasSvg';
 
     document.body.appendChild(svgElt);
 
     window.width = width;
     window.height = height;
+}
+
+function setMaxElementsSvg(maxElements) {
+    const svgElt = document.getElementById('canvasSvg');
+    svgElt.setAttribute('data-max-elements', maxElements);
 }
 
 // from https://stackoverflow.com/a/46403589
