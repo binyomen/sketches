@@ -16,58 +16,108 @@ function limitSvgElements() {
 }
 
 function createCanvasSvg(width, height) {
-    removeP5Canvas();
+    if (SVG_MODE) {
+        removeP5Canvas();
 
-    const svgElt = document.createElementNS(svgns, 'svg');
-    svgElt.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-    svgElt.setAttribute('height', height);
-    svgElt.id = 'canvasSvg';
+        const svgElt = document.createElementNS(svgns, 'svg');
+        svgElt.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+        svgElt.setAttribute('height', height);
+        svgElt.id = 'canvasSvg';
 
-    document.body.appendChild(svgElt);
+        document.body.appendChild(svgElt);
 
-    window.width = width;
-    window.height = height;
+        window.width = width;
+        window.height = height;
+    } else {
+        createCanvas(width, height);
+    }
 }
 
 function setMaxElementsSvg(maxElements) {
-    const svgElt = document.getElementById('canvasSvg');
-    svgElt.setAttribute('data-max-elements', maxElements);
+    if (SVG_MODE) {
+        const svgElt = document.getElementById('canvasSvg');
+        svgElt.setAttribute('data-max-elements', maxElements);
+    }
 }
 
 // from https://stackoverflow.com/a/46403589
 function saveSvg() {
-    const svgElt = document.getElementById('canvasSvg');
-    svgElt.setAttribute('xmlns', svgns);
-    const svgData = svgElt.outerHTML;
+    if (SVG_MODE) {
+        const svgElt = document.getElementById('canvasSvg');
+        svgElt.setAttribute('xmlns', svgns);
+        const svgData = svgElt.outerHTML;
 
-    const preface = '<?xml version="1.0" standalone="no"?>\n';
-    const svgBlob = new Blob([preface, svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const svgUrl = URL.createObjectURL(svgBlob);
+        const preface = '<?xml version="1.0" standalone="no"?>\n';
+        const svgBlob = new Blob([preface, svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const svgUrl = URL.createObjectURL(svgBlob);
 
-    const downloadLink = document.createElement("a");
-    downloadLink.href = svgUrl;
-    downloadLink.download = 'sketch.svg';
+        const downloadLink = document.createElement("a");
+        downloadLink.href = svgUrl;
+        downloadLink.download = 'sketch.svg';
 
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
 }
 
 function circleSvg(x, y, r, c) {
-    const circleElt = document.createElementNS(svgns, 'circle');
-    circleElt.setAttribute('cx', x);
-    circleElt.setAttribute('cy', y);
-    circleElt.setAttribute('r', r);
+    if (SVG_MODE) {
+        const circleElt = document.createElementNS(svgns, 'circle');
+        circleElt.setAttribute('cx', x);
+        circleElt.setAttribute('cy', y);
+        circleElt.setAttribute('r', r);
 
-    circleElt.setAttribute('fill',
-        'rgba(' +
-        red(c) + ',' +
-        green(c) + ',' +
-        blue(c) + ',' +
-        alpha(c) + ')');
+        circleElt.setAttribute('fill',
+            'rgba(' +
+            red(c) + ',' +
+            green(c) + ',' +
+            blue(c) + ',' +
+            alpha(c) + ')');
 
-    const svgElt = document.getElementById('canvasSvg');
-    svgElt.appendChild(circleElt);
+        const svgElt = document.getElementById('canvasSvg');
+        svgElt.appendChild(circleElt);
 
-    limitSvgElements();
+        limitSvgElements();
+    } else {
+        push();
+
+        noStroke();
+        fill(c);
+        circle(x, y, r);
+
+        pop();
+    }
+}
+
+function lineSvg(x1, y1, x2, y2, weight, c) {
+    if (SVG_MODE) {
+        const lineElt = document.createElementNS(svgns, 'line');
+        lineElt.setAttribute('x1', x1);
+        lineElt.setAttribute('y1', y1);
+        lineElt.setAttribute('x2', x2);
+        lineElt.setAttribute('y2', y2);
+
+        lineElt.setAttribute('stroke',
+            'rgba(' +
+            red(c) + ',' +
+            green(c) + ',' +
+            blue(c) + ',' +
+            alpha(c) + ')');
+        lineElt.setAttribute('stroke-width', weight);
+
+        const svgElt = document.getElementById('canvasSvg');
+        svgElt.appendChild(lineElt);
+
+        limitSvgElements();
+    } else {
+        push();
+
+        strokeCap(SQUARE);
+        strokeWeight(weight);
+        stroke(c);
+        line(x1, y1, x2, y2);
+
+        pop();
+    }
 }
