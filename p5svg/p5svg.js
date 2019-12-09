@@ -73,7 +73,7 @@ function circleSvg(x, y, r, c) {
             red(c) + ',' +
             green(c) + ',' +
             blue(c) + ',' +
-            alpha(c) + ')');
+            alpha(c)/255 + ')');
 
         const svgElt = document.getElementById('canvasSvg');
         svgElt.appendChild(circleElt);
@@ -103,8 +103,9 @@ function lineSvg(x1, y1, x2, y2, weight, c) {
             red(c) + ',' +
             green(c) + ',' +
             blue(c) + ',' +
-            alpha(c) + ')');
+            alpha(c)/255 + ')');
         lineElt.setAttribute('stroke-width', weight);
+        lineElt.setAttribute('stroke-linecap', 'round');
 
         const svgElt = document.getElementById('canvasSvg');
         svgElt.appendChild(lineElt);
@@ -113,7 +114,6 @@ function lineSvg(x1, y1, x2, y2, weight, c) {
     } else {
         push();
 
-        strokeCap(SQUARE);
         strokeWeight(weight);
         stroke(c);
         line(x1, y1, x2, y2);
