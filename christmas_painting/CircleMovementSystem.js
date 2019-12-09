@@ -44,19 +44,12 @@ class CircleMovementSystem {
     }
 
     p_draw(p) {
-        push();
-
-        noStroke();
-
         const index = (floor(p.x) + floor(p.y) * width) * 4;
         const r = this.img.pixels[index+0];
         const g = this.img.pixels[index+1];
         const b = this.img.pixels[index+2];
         const a = this.img.pixels[index+3];
-        fill(color(r, g, b, a));
 
-        circle(p.x, p.y, RADIUS);
-
-        pop();
+        circleSvg(p.x, p.y, RADIUS, color(r, g, b, a));
     }
 }

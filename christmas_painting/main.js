@@ -15,7 +15,7 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(img.width, img.height);
+    createCanvasSvg(img.width, img.height, 20000);
 
     img.loadPixels();
 
