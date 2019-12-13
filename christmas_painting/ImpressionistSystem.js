@@ -6,16 +6,24 @@ const SCALE_FACTOR = 200;
 const OFFSET_INC = 0.1;
 
 const MIN_LIFE_SPAN = 1;
-const MAX_LIFE_SPAN = 20;
+const MAX_LIFE_SPAN = 12;
+
+const PARTICLE_ALPHA_MAX = 30;
+const PARTICLE_ALPHA_MIN = 0;
 
 const WEIGHT_DEC_FACTOR = 0.01;
-const STARTING_WEIGHT = 500;
-const MIN_WEIGHT = 50;
+const STARTING_WEIGHT = 340;
+const MIN_WEIGHT = 30;
+
+const RECT_WIDTH_FACTOR = 1.75;
+const RECT_HEIGHT_FACTOR = 1;
+const RECT_CORNER = 200;
+
+const FLOW_FIELD_MAG = 6;
+const MAX_SPEED = 6;
 
 const NUM_PARTICLES = 100;
-const FLOW_FIELD_MAG = 6;
-const PARTICLE_ALPHA = 50;
-const MAX_SPEED = 3;
+const MARGIN = 150;
 
 class System {
     constructor(img) {
@@ -45,7 +53,7 @@ class System {
 
     update_p(p) {
         if (p.life < 0) {
-            const newPos = createVector(random(width), random(height));
+            const newPos = createVector(random(MARGIN, width-MARGIN), random(MARGIN, height-MARGIN));
             this.resetParticle(p, newPos, this.getLifespan());
         }
 
@@ -55,7 +63,7 @@ class System {
             const g = this.img.pixels[index+1];
             const b = this.img.pixels[index+2];
 
-            p.color = color(r, g, b, PARTICLE_ALPHA);
+            p.color = color(r, g, b);
         }
 
         this.applyFlowFieldToParticle(p, this.flowField);
@@ -74,10 +82,18 @@ class System {
         push();
 
         const c = p.color == null ? color(0, 0, 0) : p.color;
+        c.setAlpha(this.getParticleAlpha(p));
 
         noStroke();
         fill(c);
-        circle(p.pos.x, p.pos.y, this.weight);
+
+        rectMode(CENTER);
+        translate(p.pos.x, p.pos.y);
+        rotate(p.vel.heading());
+
+        let w = this.weight*RECT_WIDTH_FACTOR;
+        let h = this.weight*RECT_HEIGHT_FACTOR;
+        rect(0, 0, w, h, RECT_CORNER);
 
         pop();
     }
@@ -99,6 +115,10 @@ class System {
         }
     }
 
+    getParticleAlpha(p) {
+        return map(p.life, MAX_LIFE_SPAN, MIN_LIFE_SPAN, PARTICLE_ALPHA_MIN, PARTICLE_ALPHA_MAX);
+    }
+
     applyFlowFieldToParticle(p, flowField) {
         const x = floor(p.pos.x / SCALE_FACTOR);
         const y = floor(p.pos.y / SCALE_FACTOR);
@@ -116,21 +136,21 @@ class System {
     }
 
     wrapEdgesToBounds(p, w, h) {
-        if (p.pos.x > w) {
-            p.pos.x = 0;
+        if (p.pos.x > w-MARGIN) {
+            p.pos.x = MARGIN;
             p.updatePrev();
         }
-        if (p.pos.x < 0) {
-            p.pos.x = w;
+        if (p.pos.x < MARGIN) {
+            p.pos.x = w-MARGIN;
             p.updatePrev();
         }
 
-        if (p.pos.y > h) {
-            p.pos.y = 0;
+        if (p.pos.y > h-MARGIN) {
+            p.pos.y = MARGIN;
             p.updatePrev();
         }
-        if (p.pos.y < 0) {
-            p.pos.y = h;
+        if (p.pos.y < MARGIN) {
+            p.pos.y = h-MARGIN;
             p.updatePrev();
         }
     }
@@ -139,7 +159,7 @@ class System {
         const particles = [];
 
         for (const i of Array(NUM_PARTICLES).keys()) {
-            const p = new Particle(random(width), random(height));
+            const p = new Particle(random(MARGIN,width-MARGIN), random(MARGIN,height-MARGIN));
             p.vel = p5.Vector.random2D();
             p.life = this.getLifespan();
 
