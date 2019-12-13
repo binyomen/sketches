@@ -31,6 +31,8 @@ function setup() {
     img.loadPixels();
 
     system = new System(img);
+
+    background(255);
 }
 
 function draw() {
