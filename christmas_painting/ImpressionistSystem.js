@@ -1,18 +1,18 @@
 // based on https://github.com/nishtahir/generative-impressionism/
 
-const SCALE_FACTOR = 10;
+const SCALE_FACTOR = 200;
 const OFFSET_INC = 0.1;
 
 const MIN_LIFE_SPAN = 1;
-const MAX_LIFE_SPAN = 5;
+const MAX_LIFE_SPAN = 20;
 
-const WEIGHT_DEC_FACTOR = 0.001;
-const STARTING_WEIGHT = 50;
-const MIN_WEIGHT = 5;
+const WEIGHT_DEC_FACTOR = 0.01;
+const STARTING_WEIGHT = 500;
+const MIN_WEIGHT = 50;
 
 const NUM_PARTICLES = 100;
-const VECTOR_MAG = 6;
-const PARTICLE_ALPHA = 100;
+const FLOW_FIELD_MAG = 6;
+const PARTICLE_ALPHA = 50;
 const MAX_SPEED = 3;
 
 class System {
@@ -156,7 +156,7 @@ class System {
                 const angle = map(noiseValue, 0, 1, 0, TWO_PI);
 
                 const v = p5.Vector.fromAngle(angle);
-                v.setMag(VECTOR_MAG);
+                v.setMag(FLOW_FIELD_MAG);
                 flowField.push(v);
             }
         }
