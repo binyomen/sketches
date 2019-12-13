@@ -10,8 +10,6 @@ class System {
         for (const i of Array(NUM_PARTICLES).keys()) {
             this.particles.push(new Particle(random(width), random(height)));
         }
-
-        setMaxElementsSvg(20000);
     }
 
     update() {
@@ -46,12 +44,18 @@ class System {
     }
 
     p_draw(p) {
+        push();
+
         const index = (floor(p.pos.x) + floor(p.pos.y) * width) * 4;
         const r = this.img.pixels[index+0];
         const g = this.img.pixels[index+1];
         const b = this.img.pixels[index+2];
         const a = this.img.pixels[index+3];
 
-        circleSvg(p.pos.x, p.pos.y, RADIUS, color(r, g, b, a));
+        noStroke();
+        fill(color(r, g, b, a));
+        circle(p.pos.x, p.pos.y, RADIUS);
+
+        pop();
     }
 }

@@ -26,8 +26,6 @@ class System {
         this.flowField = this.generateFlowField();
 
         this.weight = STARTING_WEIGHT;
-
-        setMaxElementsSvg(900000);
     }
 
     update() {
@@ -64,15 +62,22 @@ class System {
         p.life -= 1;
 
         this.wrapEdgesToBounds(p, width, height);
-    }
-
-    draw_p(p) {
-        const c = p.color == null ? color(0, 0, 0) : p.color;
-        lineSvg(p.pos.x, p.pos.y, p.prev.x, p.prev.y, this.weight, c);
 
         if (this.weight > MIN_WEIGHT) {
             this.weight -= WEIGHT_DEC_FACTOR;
         }
+    }
+
+    draw_p(p) {
+        push();
+
+        const c = p.color == null ? color(0, 0, 0) : p.color;
+
+        noStroke();
+        fill(c);
+        circle(p.pos.x, p.pos.y, this.weight);
+
+        pop();
     }
 
     // ONLY FOR DEBUGGING

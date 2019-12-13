@@ -1,5 +1,3 @@
-const SVG_MODE = false;
-
 let img;
 let system;
 
@@ -28,7 +26,7 @@ function preload() {
 }
 
 function setup() {
-    createCanvasSvg(img.width, img.height);
+    createCanvas(img.width, img.height);
 
     img.loadPixels();
 
