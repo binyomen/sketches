@@ -1,3 +1,5 @@
+'use strict';
+
 // based on https://github.com/nishtahir/generative-impressionism/
 
 const SCALE_FACTOR = 200;

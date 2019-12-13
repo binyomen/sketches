@@ -1,3 +1,5 @@
+'use strict';
+
 class Particle {
     constructor(x, y) {
         this.pos = createVector(x, y);

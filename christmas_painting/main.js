@@ -1,3 +1,5 @@
+'use strict';
+
 let img;
 let system;
 
