@@ -15,7 +15,7 @@ function limitSvgElements() {
     }
 }
 
-function createCanvasSvg(width, height) {
+function createCanvasSvg(width, height, renderer) {
     if (SVG_MODE) {
         removeP5Canvas();
 
@@ -29,7 +29,7 @@ function createCanvasSvg(width, height) {
         window.width = width;
         window.height = height;
     } else {
-        createCanvas(width, height);
+        createCanvas(width, height, renderer);
     }
 }
 
