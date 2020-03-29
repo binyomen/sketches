@@ -1,0 +1,23 @@
+<!-- example taken from https://css-doodle.com/ -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <script src="https://unpkg.com/css-doodle@0.8.2/css-doodle.min.js"></script>
+  </head>
+  <body>
+    <css-doodle>
+      :doodle {
+          @grid: 7 / 100vmax;
+          background: #0a0c27;
+        }
+        @shape: clover 5;
+        background: hsla(
+          calc(360 - @i * 4), 70%, 68%, @r.8
+        );
+        transform:
+          scale(@r(.2, 1.5))
+          translate(@m2.@r(±50%));
+    </css-doodle>
+  </body>
+</html>
