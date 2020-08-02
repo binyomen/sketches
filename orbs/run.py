@@ -1,4 +1,5 @@
 import bpy
+import math
 import random
 
 def clear_scene():
@@ -42,8 +43,29 @@ def setup_material(mat, color):
     output = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
     mat.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
 
+def setup_background():
+    bpy.ops.mesh.primitive_plane_add(location = (0, 0, 0), size = 100)
+    plane = bpy.context.selected_objects[0]
+
+    mat = bpy.data.materials.new('plane')
+    mat.use_nodes = True
+    mat.node_tree.nodes.clear()
+
+    bsdf = mat.node_tree.nodes.new('ShaderNodeBsdfPrincipled')
+    bsdf.inputs['Base Color'].default_value = (1, 0, 1, 1)
+    output = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
+    mat.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+
+    plane.active_material = mat
+
+def setup_camera():
+    camera = bpy.data.objects['Camera']
+    camera.location = (15, -12, 10)
+
 clear_scene()
 setup_denoising()
+setup_background()
+setup_camera()
 
 red = bpy.data.materials.new('orb_red')
 setup_material(red, (1, 0, 0, 1))
@@ -54,16 +76,13 @@ setup_material(green, (0, 1, 0, 1))
 blue = bpy.data.materials.new('orb_blue')
 setup_material(blue, (0, 0, 1, 1))
 
-for i in range(20):
+for i in range(100):
     bpy.ops.mesh.primitive_uv_sphere_add(radius = random.uniform(0.1, 1))
     sphere = bpy.context.selected_objects[0]
 
-    x, y, z = random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-5, 5)
+    x, y, z = random.uniform(-15, 15), random.uniform(-5, 5), random.uniform(0, 10)
     sphere.location = (x, y, z)
-
-    material = random.choice([red, green, blue])
-    sphere.data.materials.clear()
-    sphere.active_material = material
+    sphere.active_material = random.choice([red, green, blue])
 
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.faces_shade_smooth()
