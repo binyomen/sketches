@@ -55,7 +55,7 @@ blue = bpy.data.materials.new('orb_blue')
 setup_material(blue, (0, 0, 1, 1))
 
 for i in range(20):
-    bpy.ops.mesh.primitive_uv_sphere_add()
+    bpy.ops.mesh.primitive_uv_sphere_add(radius = random.uniform(0.1, 1))
     sphere = bpy.context.selected_objects[0]
 
     x, y, z = random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-5, 5)
