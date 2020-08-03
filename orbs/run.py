@@ -27,18 +27,14 @@ def setup_denoising():
 
     tree.links.new(denoise.outputs['Image'], composite.inputs['Image'])
 
-def setup_material(mat, color):
+def setup_orb_material(mat, color):
     mat.use_nodes = True
     mat.node_tree.nodes.clear()
 
-    bsdf = mat.node_tree.nodes.new('ShaderNodeBsdfPrincipled')
+    bsdf = mat.node_tree.nodes.new('ShaderNodeBsdfGlass')
 
-    bsdf.inputs['Base Color'].default_value = color
-    bsdf.inputs['Subsurface'].default_value = 0.5
-    bsdf.inputs['Subsurface Color'].default_value = color
-    bsdf.inputs['Metallic'].default_value = 0.6
-    bsdf.inputs['Sheen'].default_value = 0.5
-    bsdf.inputs['Alpha'].default_value = 0.6
+    bsdf.inputs['Color'].default_value = color
+    bsdf.inputs['Roughness'].default_value = 0.1
 
     output = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
     mat.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
@@ -68,20 +64,21 @@ setup_background()
 setup_camera()
 
 red = bpy.data.materials.new('orb_red')
-setup_material(red, (1, 0, 0, 1))
+setup_orb_material(red, (1, 0, 0, 1))
 
 green = bpy.data.materials.new('orb_green')
-setup_material(green, (0, 1, 0, 1))
+setup_orb_material(green, (0, 1, 0, 1))
 
 blue = bpy.data.materials.new('orb_blue')
-setup_material(blue, (0, 0, 1, 1))
+setup_orb_material(blue, (0, 0, 1, 1))
 
 for i in range(100):
-    bpy.ops.mesh.primitive_uv_sphere_add(radius = random.uniform(0.1, 1))
+    radius = random.uniform(0.1, 1)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius = radius)
     sphere = bpy.context.selected_objects[0]
 
     x, y, z = random.uniform(-15, 15), random.uniform(-5, 5), random.uniform(0, 10)
-    sphere.location = (x, y, z)
+    sphere.location = (x, y, z + radius)
     sphere.active_material = random.choice([red, green, blue])
 
     bpy.ops.object.mode_set(mode = 'EDIT')
