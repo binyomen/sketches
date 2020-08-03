@@ -81,7 +81,7 @@ for i in range(100):
     bpy.ops.mesh.primitive_uv_sphere_add(radius = radius)
     sphere = bpy.context.selected_objects[0]
 
-    x, y, z = random.uniform(-15, 15), random.uniform(-5, 5), random.uniform(0, 10)
+    x, y, z = random.uniform(-10, 20), random.uniform(-5, 5), random.uniform(0, 10)
     sphere.location = (x, y, z + radius)
     sphere.active_material = random.choice([red, green, blue])
 
