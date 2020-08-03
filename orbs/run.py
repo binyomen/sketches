@@ -27,18 +27,39 @@ def setup_denoising():
 
     tree.links.new(denoise.outputs['Image'], composite.inputs['Image'])
 
+# Technique borrowed from https://www.youtube.com/watch?v=5OUpqvx6RE8.
 def setup_orb_material(mat, color):
     mat.use_nodes = True
     mat.node_tree.nodes.clear()
 
-    bsdf = mat.node_tree.nodes.new('ShaderNodeBsdfGlass')
-
-    bsdf.inputs['Color'].default_value = color
-    bsdf.inputs['Roughness'].default_value = 0.1
-    bsdf.inputs['IOR'].default_value = 1.7
-
+    light_path = mat.node_tree.nodes.new('ShaderNodeLightPath')
+    minimum = mat.node_tree.nodes.new('ShaderNodeMath')
+    glass = mat.node_tree.nodes.new('ShaderNodeBsdfGlass')
+    translucent = mat.node_tree.nodes.new('ShaderNodeBsdfTranslucent')
+    mix_shader1 = mat.node_tree.nodes.new('ShaderNodeMixShader')
+    mix_shader2 = mat.node_tree.nodes.new('ShaderNodeMixShader')
+    diffuse = mat.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
+    fresnel = mat.node_tree.nodes.new('ShaderNodeFresnel')
     output = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
-    mat.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+
+    minimum.operation = 'MINIMUM'
+    glass.inputs['Roughness'].default_value = 0
+    glass.inputs['IOR'].default_value = 1.45
+    diffuse.inputs['Color'].default_value = color
+    fresnel.inputs['IOR'].default_value = 1.47
+
+    mat.node_tree.links.new(light_path.outputs['Is Shadow Ray'], minimum.inputs[0])
+    mat.node_tree.links.new(light_path.outputs['Is Reflection Ray'], minimum.inputs[1])
+    mat.node_tree.links.new(minimum.outputs['Value'], mix_shader1.inputs['Fac'])
+
+    mat.node_tree.links.new(glass.outputs['BSDF'], mix_shader1.inputs[1])
+    mat.node_tree.links.new(translucent.outputs['BSDF'], mix_shader1.inputs[2])
+    mat.node_tree.links.new(mix_shader1.outputs['Shader'], mix_shader2.inputs[1])
+
+    mat.node_tree.links.new(fresnel.outputs['Fac'], mix_shader2.inputs['Fac'])
+    mat.node_tree.links.new(diffuse.outputs['BSDF'], mix_shader2.inputs[2])
+
+    mat.node_tree.links.new(mix_shader2.outputs['Shader'], output.inputs['Surface'])
 
 def setup_background():
     bpy.ops.mesh.primitive_plane_add(location = (0, 0, 0), size = 100)
@@ -50,11 +71,11 @@ def setup_background():
 
     checker = mat.node_tree.nodes.new('ShaderNodeTexChecker')
     checker.inputs['Scale'].default_value = 40
-    bsdf = mat.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
-    mat.node_tree.links.new(checker.outputs['Color'], bsdf.inputs['Color'])
+    diffuse = mat.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
+    mat.node_tree.links.new(checker.outputs['Color'], diffuse.inputs['Color'])
 
     output = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
-    mat.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
+    mat.node_tree.links.new(diffuse.outputs['BSDF'], output.inputs['Surface'])
 
     plane.active_material = mat
 
