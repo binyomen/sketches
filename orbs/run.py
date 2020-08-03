@@ -35,6 +35,7 @@ def setup_orb_material(mat, color):
 
     bsdf.inputs['Color'].default_value = color
     bsdf.inputs['Roughness'].default_value = 0.1
+    bsdf.inputs['IOR'].default_value = 1.7
 
     output = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
     mat.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
@@ -47,8 +48,11 @@ def setup_background():
     mat.use_nodes = True
     mat.node_tree.nodes.clear()
 
-    bsdf = mat.node_tree.nodes.new('ShaderNodeBsdfPrincipled')
-    bsdf.inputs['Base Color'].default_value = (1, 0, 1, 1)
+    checker = mat.node_tree.nodes.new('ShaderNodeTexChecker')
+    checker.inputs['Scale'].default_value = 40
+    bsdf = mat.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
+    mat.node_tree.links.new(checker.outputs['Color'], bsdf.inputs['Color'])
+
     output = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
     mat.node_tree.links.new(bsdf.outputs['BSDF'], output.inputs['Surface'])
 
