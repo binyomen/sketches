@@ -1,5 +1,6 @@
 import bpy
 import math
+import os
 import random
 
 def camera_angle_to_origin(location):
@@ -52,6 +53,7 @@ def setup_orb_material(mat, color):
     mix_shader2 = mat.node_tree.nodes.new('ShaderNodeMixShader')
     diffuse = mat.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
     fresnel = mat.node_tree.nodes.new('ShaderNodeFresnel')
+    volume_absorption = mat.node_tree.nodes.new('ShaderNodeVolumeAbsorption')
     output = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
 
     minimum.operation = 'MINIMUM'
@@ -59,6 +61,8 @@ def setup_orb_material(mat, color):
     glass.inputs['IOR'].default_value = 1.45
     diffuse.inputs['Color'].default_value = color
     fresnel.inputs['IOR'].default_value = 1.47
+    volume_absorption.inputs['Color'].default_value = color
+    volume_absorption.inputs['Density'].default_value = 3
 
     mat.node_tree.links.new(light_path.outputs['Is Shadow Ray'], minimum.inputs[0])
     mat.node_tree.links.new(light_path.outputs['Is Reflection Ray'], minimum.inputs[1])
@@ -72,6 +76,7 @@ def setup_orb_material(mat, color):
     mat.node_tree.links.new(diffuse.outputs['BSDF'], mix_shader2.inputs[2])
 
     mat.node_tree.links.new(mix_shader2.outputs['Shader'], output.inputs['Surface'])
+    mat.node_tree.links.new(volume_absorption.outputs['Volume'], output.inputs['Volume'])
 
 def setup_background():
     bpy.ops.mesh.primitive_plane_add(location = (0, 0, 0), size = 100)
@@ -102,13 +107,13 @@ setup_background()
 setup_camera()
 
 red = bpy.data.materials.new('orb_red')
-setup_orb_material(red, (1, 0, 0, 1))
+setup_orb_material(red, (1, 0.25, 0.25, 1))
 
 green = bpy.data.materials.new('orb_green')
-setup_orb_material(green, (0, 1, 0, 1))
+setup_orb_material(green, (0.25, 1, 0.25, 1))
 
 blue = bpy.data.materials.new('orb_blue')
-setup_orb_material(blue, (0, 0, 1, 1))
+setup_orb_material(blue, (0.25, 0.25, 1, 1))
 
 for i in range(100):
     radius = random.uniform(0.1, 1)
@@ -122,3 +127,6 @@ for i in range(100):
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.faces_shade_smooth()
     bpy.ops.object.mode_set(mode = 'OBJECT')
+
+blend_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'orbs.blend')
+bpy.ops.wm.save_as_mainfile(filepath = blend_file_path)
