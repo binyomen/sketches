@@ -27,7 +27,7 @@ def setup_denoising():
 
     tree.links.new(denoise.outputs['Image'], composite.inputs['Image'])
 
-# Technique borrowed from https://www.youtube.com/watch?v=5OUpqvx6RE8.
+# Technique adapted from https://www.youtube.com/watch?v=5OUpqvx6RE8.
 def setup_orb_material(mat, color):
     mat.use_nodes = True
     mat.node_tree.nodes.clear()
