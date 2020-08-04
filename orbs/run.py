@@ -2,6 +2,18 @@ import bpy
 import math
 import random
 
+def camera_angle_to_origin(location):
+    x, y, z = location
+
+    # Add tau/4 since atan2 will give us the angle from the origin to the
+    # location, which means we need to add tau/2, and also the camera starts at
+    # tau/4, so subtract that and arrive at +tau/4.
+    angle_z = math.atan2(y, x) + (math.tau / 4)
+    angle_x = math.atan2(math.sqrt(x**2 + y**2), z)
+
+    # z angle should be applied first by Blender.
+    return (angle_x, 0, angle_z)
+
 def clear_scene():
     bpy.data.objects.remove(bpy.data.objects['Cube'])
 
@@ -81,7 +93,8 @@ def setup_background():
 
 def setup_camera():
     camera = bpy.data.objects['Camera']
-    camera.location = (15, -12, 10)
+    camera.location = (16, 21, 15)
+    camera.rotation_euler = camera_angle_to_origin(camera.location)
 
 clear_scene()
 setup_denoising()
@@ -102,7 +115,7 @@ for i in range(100):
     bpy.ops.mesh.primitive_uv_sphere_add(radius = radius)
     sphere = bpy.context.selected_objects[0]
 
-    x, y, z = random.uniform(-10, 20), random.uniform(-5, 5), random.uniform(0, 10)
+    x, y, z = random.uniform(-5, 10), random.uniform(-5, 10), random.uniform(0, 10)
     sphere.location = (x, y, z + radius)
     sphere.active_material = random.choice([red, green, blue])
 
