@@ -77,7 +77,7 @@ def setup_camera():
 @functools.lru_cache(maxsize = None)
 def create_light_data():
     light_data = bpy.data.lights.new(name = 'orb_light_data', type = 'POINT')
-    light_data.energy = 15
+    light_data.energy = 100
     light_data.shadow_soft_size = 0.001
     return light_data
 
@@ -116,6 +116,8 @@ for i in range(100):
     bpy.ops.object.mode_set(mode = 'OBJECT')
 
     create_light(sphere.location)
+
+bpy.context.scene.cycles.samples = 512
 
 blend_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'orbs.blend')
 bpy.ops.wm.save_as_mainfile(filepath = blend_file_path)
