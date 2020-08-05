@@ -1,4 +1,5 @@
 import bpy
+import functools
 import math
 import os
 import random
@@ -17,6 +18,7 @@ def camera_angle_to_origin(location):
 
 def clear_scene():
     bpy.data.objects.remove(bpy.data.objects['Cube'])
+    bpy.data.objects.remove(bpy.data.objects['Light'])
 
 def setup_denoising():
     if bpy.context.scene.render.engine != 'CYCLES':
@@ -101,6 +103,21 @@ def setup_camera():
     camera.location = (16, 21, 15)
     camera.rotation_euler = camera_angle_to_origin(camera.location)
 
+# Cache the result so all lights have references to the same underlying data.
+@functools.lru_cache(maxsize = None)
+def create_light_data():
+    light_data = bpy.data.lights.new(name = 'orb_light_data', type = 'POINT')
+    light_data.energy = 15
+    light_data.shadow_soft_size = 0.001
+    return light_data
+
+def create_light(location):
+    light_data = create_light_data()
+    light = bpy.data.objects.new(name = 'orb_light', object_data = light_data)
+    light.location = location
+
+    bpy.context.collection.objects.link(light)
+
 clear_scene()
 setup_denoising()
 setup_background()
@@ -127,6 +144,8 @@ for i in range(100):
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.faces_shade_smooth()
     bpy.ops.object.mode_set(mode = 'OBJECT')
+
+    create_light(sphere.location)
 
 blend_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'orbs.blend')
 bpy.ops.wm.save_as_mainfile(filepath = blend_file_path)
