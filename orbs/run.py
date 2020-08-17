@@ -23,6 +23,7 @@ def setup_orb_material(mat, color):
 
     surface.inputs['Roughness'].default_value = 0
     surface.inputs['Transmission'].default_value = 1
+    surface.inputs['Transmission Roughness'].default_value = 0.1
     surface.inputs['IOR'].default_value = 1.45
 
     volume.inputs['Color'].default_value = color
