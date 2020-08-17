@@ -99,7 +99,7 @@ for i in range(100):
 
     create_light(sphere.location)
 
-bpy.context.scene.cycles.samples = 512
+bpy.context.scene.cycles.samples = 2048
 
 blend_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'orbs.blend')
 bpy.ops.wm.save_as_mainfile(filepath = blend_file_path)
