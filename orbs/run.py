@@ -17,38 +17,19 @@ def setup_orb_material(mat, color):
     mat.use_nodes = True
     mat.node_tree.nodes.clear()
 
-    light_path = mat.node_tree.nodes.new('ShaderNodeLightPath')
-    minimum = mat.node_tree.nodes.new('ShaderNodeMath')
-    glass = mat.node_tree.nodes.new('ShaderNodeBsdfGlass')
-    translucent = mat.node_tree.nodes.new('ShaderNodeBsdfTranslucent')
-    mix_shader1 = mat.node_tree.nodes.new('ShaderNodeMixShader')
-    mix_shader2 = mat.node_tree.nodes.new('ShaderNodeMixShader')
-    diffuse = mat.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
-    fresnel = mat.node_tree.nodes.new('ShaderNodeFresnel')
-    volume_absorption = mat.node_tree.nodes.new('ShaderNodeVolumeAbsorption')
+    surface = mat.node_tree.nodes.new('ShaderNodeBsdfPrincipled')
+    volume = mat.node_tree.nodes.new('ShaderNodeVolumePrincipled')
     output = mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
 
-    minimum.operation = 'MINIMUM'
-    glass.inputs['Roughness'].default_value = 0
-    glass.inputs['IOR'].default_value = 1.45
-    diffuse.inputs['Color'].default_value = color
-    fresnel.inputs['IOR'].default_value = 1.47
-    volume_absorption.inputs['Color'].default_value = color
-    volume_absorption.inputs['Density'].default_value = 3
+    surface.inputs['Roughness'].default_value = 0
+    surface.inputs['Transmission'].default_value = 1
+    surface.inputs['IOR'].default_value = 1.45
 
-    mat.node_tree.links.new(light_path.outputs['Is Shadow Ray'], minimum.inputs[0])
-    mat.node_tree.links.new(light_path.outputs['Is Reflection Ray'], minimum.inputs[1])
-    mat.node_tree.links.new(minimum.outputs['Value'], mix_shader1.inputs['Fac'])
+    volume.inputs['Color'].default_value = color
+    volume.inputs['Density'].default_value = 3
 
-    mat.node_tree.links.new(glass.outputs['BSDF'], mix_shader1.inputs[1])
-    mat.node_tree.links.new(translucent.outputs['BSDF'], mix_shader1.inputs[2])
-    mat.node_tree.links.new(mix_shader1.outputs['Shader'], mix_shader2.inputs[1])
-
-    mat.node_tree.links.new(fresnel.outputs['Fac'], mix_shader2.inputs['Fac'])
-    mat.node_tree.links.new(diffuse.outputs['BSDF'], mix_shader2.inputs[2])
-
-    mat.node_tree.links.new(mix_shader2.outputs['Shader'], output.inputs['Surface'])
-    mat.node_tree.links.new(volume_absorption.outputs['Volume'], output.inputs['Volume'])
+    mat.node_tree.links.new(surface.outputs['BSDF'], output.inputs['Surface'])
+    mat.node_tree.links.new(volume.outputs['Volume'], output.inputs['Volume'])
 
 def setup_background():
     bpy.ops.mesh.primitive_plane_add(location = (0, 0, 0), size = 100)
