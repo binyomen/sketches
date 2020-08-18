@@ -27,7 +27,7 @@ def setup_orb_material(mat, color):
     surface.inputs['IOR'].default_value = 1.45
 
     volume.inputs['Color'].default_value = color
-    volume.inputs['Density'].default_value = 3
+    volume.inputs['Density'].default_value = 1
 
     mat.node_tree.links.new(surface.outputs['BSDF'], output.inputs['Surface'])
     mat.node_tree.links.new(volume.outputs['Volume'], output.inputs['Volume'])
