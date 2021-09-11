@@ -14,7 +14,7 @@ pub struct Frond {
 
 impl Frond {
     pub fn new<R: Rng>(x: f32, rng: &mut R) -> Self {
-        let max_height = rng.gen_range(100.0..700.0);
+        let max_height = rng.gen_range(100.0..300.0);
         Frond {
             branches: vec![
                 Branch::new(x, -5.0, max_height),
@@ -104,7 +104,7 @@ impl Branch {
         ));
 
         self.height += t;
-        self.relative_offset = (1.0 / 5.0) * self.original_offset * t.powi(4);
+        self.relative_offset = (1.0 / 50.0) * self.original_offset * t.powi(4);
 
         if self.height > self.max_height {
             self.t_before_curl = t;
