@@ -1,5 +1,5 @@
 use {
-    nannou::{draw::Draw, event::Event, glam::Vec2},
+    nannou::{draw::Draw, event::Event, glam::Vec2, prelude::Point2},
     rand::Rng,
     std::f32::consts::{E, PI},
 };
@@ -44,9 +44,10 @@ struct Branch {
     frond_center: f32,
     original_offset: f32,
     max_height: f32,
-    radius: f32,
+    weight: f32,
     height: f32,
     relative_offset: f32,
+    prev_point: Option<Point2>,
     t_before_curl: f32,
     curl: Option<Curl>,
 }
@@ -57,9 +58,10 @@ impl Branch {
             frond_center,
             original_offset,
             max_height,
-            radius: 3.0,
+            weight: 3.0,
             height: 0.0,
             relative_offset: 0.0,
+            prev_point: None,
             t_before_curl: 0.0,
             curl: None,
         }
@@ -69,7 +71,7 @@ impl Branch {
         if let Event::Update(update) = event {
             let t = update.since_start.as_secs_f32();
 
-            self.radius *= 0.999;
+            self.weight *= 0.999;
             match &mut self.curl {
                 Some(curl) => curl.event(t - self.t_before_curl),
                 None => self.update_position(t),
@@ -81,18 +83,26 @@ impl Branch {
         match &self.curl {
             Some(curl) => curl.view(draw),
             None => {
-                draw.ellipse()
-                    .x_y(
-                        self.frond_center + self.original_offset + self.relative_offset,
-                        WINDOW_BOTTOM + self.height,
-                    )
-                    .radius(self.radius)
-                    .rgb(0.3, 0.3, 0.3);
+                if let Some(prev_point) = self.prev_point {
+                    draw.line()
+                        .start(prev_point)
+                        .end(Point2::new(
+                            self.frond_center + self.original_offset + self.relative_offset,
+                            WINDOW_BOTTOM + self.height,
+                        ))
+                        .weight(self.weight)
+                        .rgb(0.3, 0.3, 0.3);
+                }
             }
         }
     }
 
     fn update_position(&mut self, t: f32) {
+        self.prev_point = Some(Point2::new(
+            self.frond_center + self.original_offset + self.relative_offset,
+            WINDOW_BOTTOM + self.height,
+        ));
+
         self.height += t;
         self.relative_offset = (1.0 / 5.0) * self.original_offset * t.powi(4);
 
@@ -108,13 +118,14 @@ impl Branch {
             };
             self.curl = Some(Curl {
                 amplitude: self.original_offset.abs() * 10.0,
-                radius: self.radius,
+                weight: self.weight,
                 direction_multiplier,
                 starting_point: Vec2::new(
                     self.frond_center + self.original_offset + self.relative_offset,
                     WINDOW_BOTTOM + self.height,
                 ),
                 relative_position: Vec2::new(0.0, 0.0),
+                prev_point: self.prev_point,
             });
         }
     }
@@ -122,15 +133,21 @@ impl Branch {
 
 struct Curl {
     amplitude: f32,
-    radius: f32,
+    weight: f32,
     direction_multiplier: f32,
     starting_point: Vec2,
     relative_position: Vec2,
+    prev_point: Option<Point2>,
 }
 
 impl Curl {
     fn event(&mut self, t: f32) {
-        self.radius *= 0.99;
+        self.prev_point = Some(Point2::new(
+            self.starting_point.x + self.relative_position.x,
+            self.starting_point.y + self.relative_position.y,
+        ));
+
+        self.weight *= 0.99;
 
         // See https://en.wikipedia.org/wiki/Damping#Damped_sine_wave and
         // https://mathworld.wolfram.com/LogarithmicSpiral.html
@@ -158,13 +175,16 @@ impl Curl {
     }
 
     fn view(&self, draw: &Draw) {
-        draw.ellipse()
-            .x_y(
-                self.starting_point.x + self.relative_position.x,
-                self.starting_point.y + self.relative_position.y,
-            )
-            .radius(self.radius)
-            .rgb(0.3, 0.3, 0.3);
+        if let Some(prev_point) = self.prev_point {
+            draw.line()
+                .start(prev_point)
+                .end(Point2::new(
+                    self.starting_point.x + self.relative_position.x,
+                    self.starting_point.y + self.relative_position.y,
+                ))
+                .weight(self.weight)
+                .rgb(0.3, 0.3, 0.3);
+        }
     }
 }
 
