@@ -89,7 +89,7 @@ impl Branch {
     fn update_position(&mut self, t: f32) {
         self.height += 0.5;
 
-        if self.height > 50.0 {
+        if self.height > 300.0 {
             self.t_before_curl = t;
 
             let direction_multiplier = if self.original_offset < 0.0 {
