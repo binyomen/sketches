@@ -26,7 +26,7 @@ fn model(app: &App) -> Model {
     let mut fronds = Vec::with_capacity(num_fronds);
     for _ in 0..num_fronds {
         let frond_position = rng.gen_range(-(WIDTH as f32) / 2.0..(WIDTH as f32) / 2.0);
-        fronds.push(Frond::new(frond_position));
+        fronds.push(Frond::new(frond_position, &mut rng));
     }
 
     Model {

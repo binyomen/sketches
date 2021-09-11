@@ -1,5 +1,6 @@
 use {
     nannou::{draw::Draw, event::Event, glam::Vec2},
+    rand::Rng,
     std::f32::consts::{E, PI},
 };
 
@@ -12,15 +13,16 @@ pub struct Frond {
 }
 
 impl Frond {
-    pub fn new(x: f32) -> Self {
+    pub fn new<R: Rng>(x: f32, rng: &mut R) -> Self {
+        let max_height = rng.gen_range(100.0..700.0);
         Frond {
             branches: vec![
-                Branch::new(x, -5.0),
-                Branch::new(x, -2.5),
-                Branch::new(x, -1.0),
-                Branch::new(x, 1.0),
-                Branch::new(x, 2.5),
-                Branch::new(x, 5.0),
+                Branch::new(x, -5.0, max_height),
+                Branch::new(x, -2.5, max_height),
+                Branch::new(x, -1.0, max_height),
+                Branch::new(x, 1.0, max_height),
+                Branch::new(x, 2.5, max_height),
+                Branch::new(x, 5.0, max_height),
             ],
         }
     }
@@ -41,6 +43,7 @@ impl Frond {
 struct Branch {
     frond_center: f32,
     original_offset: f32,
+    max_height: f32,
     radius: f32,
     height: f32,
     relative_offset: f32,
@@ -49,10 +52,11 @@ struct Branch {
 }
 
 impl Branch {
-    fn new(frond_center: f32, original_offset: f32) -> Self {
+    fn new(frond_center: f32, original_offset: f32, max_height: f32) -> Self {
         Branch {
             frond_center,
             original_offset,
+            max_height,
             radius: 3.0,
             height: 0.0,
             relative_offset: 0.0,
@@ -95,7 +99,7 @@ impl Branch {
         self.height += t;
         self.relative_offset = (1.0 / 5.0) * self.original_offset * t.powi(4);
 
-        if self.height > 300.0 {
+        if self.height > self.max_height {
             self.t_before_curl = t;
 
             let direction_multiplier = if self.original_offset < 0.0 {
