@@ -1,10 +1,11 @@
 use {
-    nannou::{draw::Draw, event::Event},
+    nannou::{draw::Draw, event::Event, glam::Vec2},
     std::f32::consts::{E, PI},
 };
 
 pub const WIDTH: u32 = 800;
 pub const HEIGHT: u32 = 500;
+const WINDOW_BOTTOM: f32 = -((HEIGHT as f32) / 2.0);
 
 pub struct Frond {
     branches: Vec<Branch>,
@@ -38,8 +39,9 @@ struct Branch {
     frond_center: f32,
     original_offset: f32,
     radius: f32,
-    x: f32,
-    y: f32,
+    height: f32,
+    t_before_curl: f32,
+    curl: Option<Curl>,
 }
 
 impl Branch {
@@ -48,52 +50,114 @@ impl Branch {
             frond_center,
             original_offset,
             radius: 3.0,
-            x: 0.0,
-            y: 0.0,
+            height: 0.0,
+            t_before_curl: 0.0,
+            curl: None,
         }
     }
 
     fn event(&mut self, event: &Event) {
         match event {
             Event::Update(update) => {
-                self.radius *= 0.99;
-                self.update_position(update.since_start.as_secs_f32());
+                let t = update.since_start.as_secs_f32();
+
+                self.radius *= 0.999;
+                match &mut self.curl {
+                    Some(curl) => curl.event(t - self.t_before_curl),
+                    None => self.update_position(t),
+                }
             }
             _ => (),
         }
     }
 
     fn view(&self, draw: &Draw) {
-        const WINDOW_BOTTOM: f32 = -((HEIGHT as f32) / 2.0);
-        draw.ellipse()
-            .x_y(
-                self.frond_center + self.original_offset + self.x,
-                WINDOW_BOTTOM + self.y,
-            )
-            .radius(self.radius)
-            .rgb(0.3, 0.3, 0.3);
+        match &self.curl {
+            Some(curl) => curl.view(draw),
+            None => {
+                draw.ellipse()
+                    .x_y(
+                        self.frond_center + self.original_offset,
+                        WINDOW_BOTTOM + self.height,
+                    )
+                    .radius(self.radius)
+                    .rgb(0.3, 0.3, 0.3);
+            }
+        }
     }
 
     fn update_position(&mut self, t: f32) {
-        let direction_multiplier = if self.original_offset < 0.0 {
-            -1.0
-        } else if self.original_offset > 0.0 {
-            1.0
-        } else {
-            0.0
-        };
+        self.height += 0.5;
+
+        if self.height > 50.0 {
+            self.t_before_curl = t;
+
+            let direction_multiplier = if self.original_offset < 0.0 {
+                -1.0
+            } else if self.original_offset > 0.0 {
+                1.0
+            } else {
+                0.0
+            };
+            self.curl = Some(Curl {
+                amplitude: self.original_offset.abs() * 10.0,
+                radius: self.radius,
+                direction_multiplier,
+                starting_point: Vec2::new(
+                    self.frond_center + self.original_offset,
+                    WINDOW_BOTTOM + self.height,
+                ),
+                relative_position: Vec2::new(0.0, 0.0),
+            });
+        }
+    }
+}
+
+struct Curl {
+    amplitude: f32,
+    radius: f32,
+    direction_multiplier: f32,
+    starting_point: Vec2,
+    relative_position: Vec2,
+}
+
+impl Curl {
+    fn event(&mut self, t: f32) {
+        self.radius *= 0.99;
 
         // See https://en.wikipedia.org/wiki/Damping#Damped_sine_wave and
         // https://mathworld.wolfram.com/LogarithmicSpiral.html
-        let amplitude = self.original_offset.abs() * 10.0;
         const DECAY_RATE: f32 = 0.7;
         const ANGULAR_FREQUENCY: f32 = PI;
         const PHASE_ANGLE: f32 = 0.0;
-        let function_output =
-            damped_function_cos(t, amplitude, DECAY_RATE, ANGULAR_FREQUENCY, PHASE_ANGLE);
-        self.x = direction_multiplier * -(function_output - amplitude);
+        let function_output = damped_function_cos(
+            t,
+            self.amplitude,
+            DECAY_RATE,
+            ANGULAR_FREQUENCY,
+            PHASE_ANGLE,
+        );
 
-        self.y = damped_function_sin(t, amplitude, DECAY_RATE, ANGULAR_FREQUENCY, PHASE_ANGLE);
+        let x = self.direction_multiplier * -(function_output - self.amplitude);
+        let y = damped_function_sin(
+            t,
+            self.amplitude,
+            DECAY_RATE,
+            ANGULAR_FREQUENCY,
+            PHASE_ANGLE,
+        );
+
+        self.relative_position = Vec2::new(x, y);
+    }
+
+    fn view(&self, draw: &Draw) {
+        draw.ellipse()
+            .x_y(
+                self.starting_point.x + self.relative_position.x,
+                self.starting_point.y + self.relative_position.y,
+            )
+            .radius(self.radius)
+            .rgb(0.3, 0.3, 0.3);
     }
 }
 
