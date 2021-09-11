@@ -15,12 +15,12 @@ impl Frond {
     pub fn new(x: f32) -> Self {
         Frond {
             branches: vec![
-                Branch::new(x, x - 5.0),
-                Branch::new(x, x - 2.5),
-                Branch::new(x, x - 1.0),
-                Branch::new(x, x + 1.0),
-                Branch::new(x, x + 2.5),
-                Branch::new(x, x + 5.0),
+                Branch::new(x, -5.0),
+                Branch::new(x, -2.5),
+                Branch::new(x, -1.0),
+                Branch::new(x, 1.0),
+                Branch::new(x, 2.5),
+                Branch::new(x, 5.0),
             ],
         }
     }

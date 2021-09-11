@@ -21,7 +21,7 @@ fn model(app: &App) -> Model {
 
     Model {
         num_updates: 0,
-        fronds: vec![Frond::new(0.0)],
+        fronds: vec![Frond::new(0.0), Frond::new(400.0), Frond::new(-400.0)],
     }
 }
 
