@@ -1,6 +1,7 @@
 use {
     fronds::{Frond, HEIGHT, WIDTH},
     nannou::{app::App, event::Event, frame::Frame},
+    rand::{thread_rng, Rng},
 };
 
 struct Model {
@@ -19,9 +20,18 @@ fn model(app: &App) -> Model {
         .build()
         .unwrap();
 
+    let mut rng = thread_rng();
+
+    let num_fronds = rng.gen_range(5..12);
+    let mut fronds = Vec::with_capacity(num_fronds);
+    for _ in 0..num_fronds {
+        let frond_position = rng.gen_range(-(WIDTH as f32) / 2.0..(WIDTH as f32) / 2.0);
+        fronds.push(Frond::new(frond_position));
+    }
+
     Model {
         num_updates: 0,
-        fronds: vec![Frond::new(0.0), Frond::new(400.0), Frond::new(-400.0)],
+        fronds,
     }
 }
 
