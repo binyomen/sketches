@@ -1,15 +1,37 @@
-use nannou::{app::App, event::Event, frame::Frame};
+use {
+    fronds::{Frond, HEIGHT, WIDTH},
+    nannou::{app::App, event::Event, frame::Frame},
+};
 
-struct Model;
-
-fn main() {
-    nannou::app(model).event(event).simple_window(view).run();
+struct Model {
+    fronds: Vec<Frond>,
 }
 
-fn model(_app: &App) -> Model {
-    Model
+fn main() {
+    nannou::app(model).event(event).view(view).run();
+}
+
+fn model(app: &App) -> Model {
+    app.new_window()
+        .title("Fronds")
+        .size(WIDTH, HEIGHT)
+        .build()
+        .unwrap();
+
+    Model {
+        fronds: vec![Frond::new(0.0)],
+    }
 }
 
 fn event(_app: &App, _model: &mut Model, _event: Event) {}
 
-fn view(_app: &App, _model: &Model, _frame: Frame) {}
+fn view(app: &App, model: &Model, frame: Frame) {
+    let draw = app.draw();
+    draw.background().rgb(0.116, 0.116, 0.116);
+
+    for frond in &model.fronds {
+        frond.view(&draw);
+    }
+
+    draw.to_frame(app, &frame).unwrap();
+}
