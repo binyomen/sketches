@@ -66,17 +66,14 @@ impl Branch {
     }
 
     fn event(&mut self, event: &Event) {
-        match event {
-            Event::Update(update) => {
-                let t = update.since_start.as_secs_f32();
+        if let Event::Update(update) = event {
+            let t = update.since_start.as_secs_f32();
 
-                self.radius *= 0.999;
-                match &mut self.curl {
-                    Some(curl) => curl.event(t - self.t_before_curl),
-                    None => self.update_position(t),
-                }
+            self.radius *= 0.999;
+            match &mut self.curl {
+                Some(curl) => curl.event(t - self.t_before_curl),
+                None => self.update_position(t),
             }
-            _ => (),
         }
     }
 
