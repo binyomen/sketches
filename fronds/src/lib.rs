@@ -38,8 +38,8 @@ struct Branch {
     frond_center: f32,
     original_offset: f32,
     radius: f32,
-    height: f32,
-    relative_offset: f32,
+    x: f32,
+    y: f32,
 }
 
 impl Branch {
@@ -48,17 +48,16 @@ impl Branch {
             frond_center,
             original_offset,
             radius: 3.0,
-            height: 0.0,
-            relative_offset: 0.0,
+            x: 0.0,
+            y: 0.0,
         }
     }
 
     fn event(&mut self, event: &Event) {
         match event {
-            Event::Update(_) => {
-                self.height += 0.5;
-                // self.radius *= 0.99;
-                self.update_relative_offset();
+            Event::Update(update) => {
+                self.radius *= 0.99;
+                self.update_position(update.since_start.as_secs_f32());
             }
             _ => (),
         }
@@ -68,14 +67,14 @@ impl Branch {
         const WINDOW_BOTTOM: f32 = -((HEIGHT as f32) / 2.0);
         draw.ellipse()
             .x_y(
-                self.frond_center + self.original_offset + self.relative_offset,
-                WINDOW_BOTTOM + self.height,
+                self.frond_center + self.original_offset + self.x,
+                WINDOW_BOTTOM + self.y,
             )
             .radius(self.radius)
             .rgb(0.3, 0.3, 0.3);
     }
 
-    fn update_relative_offset(&mut self) {
+    fn update_position(&mut self, t: f32) {
         let direction_multiplier = if self.original_offset < 0.0 {
             -1.0
         } else if self.original_offset > 0.0 {
@@ -84,11 +83,61 @@ impl Branch {
             0.0
         };
 
-        // See https://en.wikipedia.org/wiki/Damping#Damped_sine_wave
+        // See https://en.wikipedia.org/wiki/Damping#Damped_sine_wave and
+        // https://mathworld.wolfram.com/LogarithmicSpiral.html
         let amplitude = self.original_offset.abs() * 10.0;
         const DECAY_RATE: f32 = 0.7;
-        let x = self.height * 0.01;
-        let function_output = amplitude * E.powf(-DECAY_RATE * x) * (PI * x).cos();
-        self.relative_offset = direction_multiplier * -(function_output - amplitude);
+        const ANGULAR_FREQUENCY: f32 = PI;
+        const PHASE_ANGLE: f32 = 0.0;
+        let function_output =
+            damped_function_cos(t, amplitude, DECAY_RATE, ANGULAR_FREQUENCY, PHASE_ANGLE);
+        self.x = direction_multiplier * -(function_output - amplitude);
+
+        self.y = damped_function_sin(t, amplitude, DECAY_RATE, ANGULAR_FREQUENCY, PHASE_ANGLE);
     }
+}
+
+fn damped_function_cos(
+    t: f32,
+    amplitude: f32,
+    decay_rate: f32,
+    angular_frequency: f32,
+    phase_angle: f32,
+) -> f32 {
+    damped_function(
+        t,
+        amplitude,
+        decay_rate,
+        angular_frequency,
+        phase_angle,
+        f32::cos,
+    )
+}
+
+fn damped_function_sin(
+    t: f32,
+    amplitude: f32,
+    decay_rate: f32,
+    angular_frequency: f32,
+    phase_angle: f32,
+) -> f32 {
+    damped_function(
+        t,
+        amplitude,
+        decay_rate,
+        angular_frequency,
+        phase_angle,
+        f32::sin,
+    )
+}
+
+fn damped_function<F: FnOnce(f32) -> f32>(
+    t: f32,
+    amplitude: f32,
+    decay_rate: f32,
+    angular_frequency: f32,
+    phase_angle: f32,
+    f: F,
+) -> f32 {
+    amplitude * E.powf(-decay_rate * t) * f(angular_frequency * t - phase_angle)
 }
