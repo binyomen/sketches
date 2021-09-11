@@ -1,4 +1,7 @@
-use nannou::{draw::Draw, event::Event};
+use {
+    nannou::{draw::Draw, event::Event},
+    std::f32::consts::{E, PI},
+};
 
 pub const WIDTH: u32 = 800;
 pub const HEIGHT: u32 = 500;
@@ -32,19 +35,21 @@ impl Frond {
 }
 
 struct Branch {
-    center: f32,
-    offset: f32,
+    frond_center: f32,
+    original_offset: f32,
     radius: f32,
     height: f32,
+    relative_offset: f32,
 }
 
 impl Branch {
-    fn new(center: f32, offset: f32) -> Self {
+    fn new(frond_center: f32, original_offset: f32) -> Self {
         Branch {
-            center,
-            offset,
-            radius: 10.0,
+            frond_center,
+            original_offset,
+            radius: 3.0,
             height: 0.0,
+            relative_offset: 0.0,
         }
     }
 
@@ -52,8 +57,8 @@ impl Branch {
         match event {
             Event::Update(_) => {
                 self.height += 0.5;
-                self.radius *= 0.999;
-                self.update_offset();
+                // self.radius *= 0.99;
+                self.update_relative_offset();
             }
             _ => (),
         }
@@ -62,22 +67,28 @@ impl Branch {
     fn view(&self, draw: &Draw) {
         const WINDOW_BOTTOM: f32 = -((HEIGHT as f32) / 2.0);
         draw.ellipse()
-            .x_y(self.center + self.offset, WINDOW_BOTTOM + self.height)
+            .x_y(
+                self.frond_center + self.original_offset + self.relative_offset,
+                WINDOW_BOTTOM + self.height,
+            )
             .radius(self.radius)
             .rgb(0.3, 0.3, 0.3);
     }
 
-    fn update_offset(&mut self) {
-        let direction_multiplier = if self.offset < 0.0 {
+    fn update_relative_offset(&mut self) {
+        let direction_multiplier = if self.original_offset < 0.0 {
             -1.0
-        } else if self.offset > 0.0 {
+        } else if self.original_offset > 0.0 {
             1.0
         } else {
             0.0
         };
 
-        let shifted_height = (self.height / 100.0) - 4.493;
-        let new_offset = (5.0 / shifted_height) * (shifted_height).sin();
-        self.offset = new_offset * direction_multiplier;
+        // See https://en.wikipedia.org/wiki/Damping#Damped_sine_wave
+        let amplitude = self.original_offset.abs() * 10.0;
+        const DECAY_RATE: f32 = 0.7;
+        let x = self.height * 0.01;
+        let function_output = amplitude * E.powf(-DECAY_RATE * x) * (PI * x).cos();
+        self.relative_offset = direction_multiplier * -(function_output - amplitude);
     }
 }
