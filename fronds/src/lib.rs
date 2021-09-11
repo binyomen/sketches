@@ -16,7 +16,10 @@ impl Frond {
         Frond {
             branches: vec![
                 Branch::new(x, x - 5.0),
-                Branch::new(x, x),
+                Branch::new(x, x - 2.5),
+                Branch::new(x, x - 1.0),
+                Branch::new(x, x + 1.0),
+                Branch::new(x, x + 2.5),
                 Branch::new(x, x + 5.0),
             ],
         }
