@@ -40,6 +40,7 @@ struct Branch {
     original_offset: f32,
     radius: f32,
     height: f32,
+    relative_offset: f32,
     t_before_curl: f32,
     curl: Option<Curl>,
 }
@@ -51,6 +52,7 @@ impl Branch {
             original_offset,
             radius: 3.0,
             height: 0.0,
+            relative_offset: 0.0,
             t_before_curl: 0.0,
             curl: None,
         }
@@ -77,7 +79,7 @@ impl Branch {
             None => {
                 draw.ellipse()
                     .x_y(
-                        self.frond_center + self.original_offset,
+                        self.frond_center + self.original_offset + self.relative_offset,
                         WINDOW_BOTTOM + self.height,
                     )
                     .radius(self.radius)
@@ -87,7 +89,8 @@ impl Branch {
     }
 
     fn update_position(&mut self, t: f32) {
-        self.height += 0.5;
+        self.height += t;
+        self.relative_offset = (1.0 / 5.0) * self.original_offset * t.powi(4);
 
         if self.height > 300.0 {
             self.t_before_curl = t;
@@ -104,7 +107,7 @@ impl Branch {
                 radius: self.radius,
                 direction_multiplier,
                 starting_point: Vec2::new(
-                    self.frond_center + self.original_offset,
+                    self.frond_center + self.original_offset + self.relative_offset,
                     WINDOW_BOTTOM + self.height,
                 ),
                 relative_position: Vec2::new(0.0, 0.0),
