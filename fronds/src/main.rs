@@ -5,7 +5,7 @@ use {
 };
 
 struct Model {
-    num_events: u64,
+    num_updates: u64,
     fronds: Vec<(f32, Frond)>,
     t: f32,
 }
@@ -37,16 +37,16 @@ fn model(app: &App) -> Model {
     fronds.sort_by(|(d1, _), (d2, _)| d2.partial_cmp(d1).unwrap());
 
     Model {
-        num_events: 0,
+        num_updates: 0,
         fronds,
         t: 0.0,
     }
 }
 
 fn event(_app: &App, model: &mut Model, event: Event) {
-    model.num_events += 1;
-
     if let Event::Update(update) = event {
+        model.num_updates += 1;
+
         let t = update.since_last.as_secs_f32();
         model.t += t;
         if model.t > 10.0 {
@@ -61,7 +61,7 @@ fn event(_app: &App, model: &mut Model, event: Event) {
 fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
 
-    if model.num_events == 0 {
+    if model.num_updates <= 1 {
         draw.background()
             .rgb(BACKGROUND_COLOR, BACKGROUND_COLOR, BACKGROUND_COLOR);
     }
