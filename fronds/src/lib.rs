@@ -8,21 +8,23 @@ pub const WIDTH: u32 = 800;
 pub const HEIGHT: u32 = 500;
 const WINDOW_BOTTOM: f32 = -((HEIGHT as f32) / 2.0);
 
+pub const BACKGROUND_COLOR: f32 = 0.116;
+
 pub struct Frond {
     branches: Vec<Branch>,
 }
 
 impl Frond {
-    pub fn new<R: Rng>(x: f32, rng: &mut R) -> Self {
+    pub fn new<R: Rng>(x: f32, distance: f32, rng: &mut R) -> Self {
         let max_height = rng.gen_range(100.0..300.0);
         Frond {
             branches: vec![
-                Branch::new(x, -5.0, max_height),
-                Branch::new(x, -2.5, max_height),
-                Branch::new(x, -1.0, max_height),
-                Branch::new(x, 1.0, max_height),
-                Branch::new(x, 2.5, max_height),
-                Branch::new(x, 5.0, max_height),
+                Branch::new(x, -5.0, max_height, distance),
+                Branch::new(x, -2.5, max_height, distance),
+                Branch::new(x, -1.0, max_height, distance),
+                Branch::new(x, 1.0, max_height, distance),
+                Branch::new(x, 2.5, max_height, distance),
+                Branch::new(x, 5.0, max_height, distance),
             ],
         }
     }
@@ -45,6 +47,7 @@ struct Branch {
     original_offset: f32,
     max_height: f32,
     weight: f32,
+    color: f32,
     height: f32,
     relative_offset: f32,
     prev_point: Option<Point2>,
@@ -53,12 +56,13 @@ struct Branch {
 }
 
 impl Branch {
-    fn new(frond_center: f32, original_offset: f32, max_height: f32) -> Self {
+    fn new(frond_center: f32, original_offset: f32, max_height: f32, distance: f32) -> Self {
         Branch {
             frond_center,
             original_offset,
             max_height,
-            weight: 3.0,
+            weight: 10.0 * distance,
+            color: (distance / 2.0) + BACKGROUND_COLOR,
             height: 0.0,
             relative_offset: 0.0,
             prev_point: None,
@@ -91,7 +95,7 @@ impl Branch {
                             WINDOW_BOTTOM + self.height,
                         ))
                         .weight(self.weight)
-                        .rgb(0.3, 0.3, 0.3);
+                        .rgb(self.color, self.color, self.color);
                 }
             }
         }
@@ -119,6 +123,7 @@ impl Branch {
             self.curl = Some(Curl {
                 amplitude: self.original_offset.abs() * 10.0,
                 weight: self.weight,
+                color: self.color,
                 direction_multiplier,
                 starting_point: Vec2::new(
                     self.frond_center + self.original_offset + self.relative_offset,
@@ -134,6 +139,7 @@ impl Branch {
 struct Curl {
     amplitude: f32,
     weight: f32,
+    color: f32,
     direction_multiplier: f32,
     starting_point: Vec2,
     relative_position: Vec2,
@@ -183,7 +189,7 @@ impl Curl {
                     self.starting_point.y + self.relative_position.y,
                 ))
                 .weight(self.weight)
-                .rgb(0.3, 0.3, 0.3);
+                .rgb(self.color, self.color, self.color);
         }
     }
 }

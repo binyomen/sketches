@@ -1,5 +1,5 @@
 use {
-    fronds::{Frond, HEIGHT, WIDTH},
+    fronds::{Frond, BACKGROUND_COLOR, HEIGHT, WIDTH},
     nannou::{app::App, event::Event, frame::Frame},
     rand::{thread_rng, Rng},
 };
@@ -26,7 +26,8 @@ fn model(app: &App) -> Model {
     let mut fronds = Vec::with_capacity(num_fronds);
     for _ in 0..num_fronds {
         let frond_position = rng.gen_range(-(WIDTH as f32) / 2.0..(WIDTH as f32) / 2.0);
-        fronds.push(Frond::new(frond_position, &mut rng));
+        let frond_distance = rng.gen();
+        fronds.push(Frond::new(frond_position, frond_distance, &mut rng));
     }
 
     Model {
@@ -47,7 +48,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
 
     if model.num_updates == 0 {
-        draw.background().rgb(0.116, 0.116, 0.116);
+        draw.background()
+            .rgb(BACKGROUND_COLOR, BACKGROUND_COLOR, BACKGROUND_COLOR);
     }
 
     for frond in &model.fronds {
