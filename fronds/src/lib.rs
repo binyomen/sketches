@@ -1,5 +1,5 @@
 use {
-    nannou::{draw::Draw, event::Event, glam::Vec2, prelude::Point2},
+    nannou::{draw::Draw, glam::Vec2, prelude::Point2},
     rand::Rng,
     std::f32::consts::{E, PI},
 };
@@ -29,9 +29,9 @@ impl Frond {
         }
     }
 
-    pub fn event(&mut self, event: &Event) {
+    pub fn event(&mut self, t: f32) {
         for branch in &mut self.branches {
-            branch.event(event);
+            branch.event(t);
         }
     }
 
@@ -71,15 +71,11 @@ impl Branch {
         }
     }
 
-    fn event(&mut self, event: &Event) {
-        if let Event::Update(update) = event {
-            let t = update.since_start.as_secs_f32();
-
-            self.weight *= 0.999;
-            match &mut self.curl {
-                Some(curl) => curl.event(t - self.t_before_curl),
-                None => self.update_position(t),
-            }
+    fn event(&mut self, t: f32) {
+        self.weight *= 0.999;
+        match &mut self.curl {
+            Some(curl) => curl.event(t - self.t_before_curl),
+            None => self.update_position(t),
         }
     }
 
