@@ -23,7 +23,7 @@ fn model(app: &App) -> Model {
 
     let mut rng = thread_rng();
 
-    let num_fronds = rng.gen_range(5..12);
+    let num_fronds = rng.gen_range(12..22);
     let mut fronds = Vec::with_capacity(num_fronds);
     for _ in 0..num_fronds {
         let frond_position = rng.gen_range(-(WIDTH as f32) / 2.0..(WIDTH as f32) / 2.0);
@@ -49,7 +49,7 @@ fn event(_app: &App, model: &mut Model, event: Event) {
     if let Event::Update(update) = event {
         let t = update.since_last.as_secs_f32();
         model.t += t;
-        if model.t > 7.0 {
+        if model.t > 10.0 {
             model.t = 0.0;
             model.fronds.pop();
         } else if let Some((_, frond)) = model.fronds.last_mut() {

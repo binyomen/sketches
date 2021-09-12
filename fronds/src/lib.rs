@@ -16,7 +16,7 @@ pub struct Frond {
 
 impl Frond {
     pub fn new<R: Rng>(x: f32, distance: f32, rng: &mut R) -> Self {
-        let max_height = rng.gen_range(100.0..300.0);
+        let max_height = rng.gen_range(50.0..450.0);
         Frond {
             branches: vec![
                 Branch::new(x, -5.0, max_height, distance),
@@ -61,8 +61,8 @@ impl Branch {
             frond_center,
             original_offset,
             max_height,
-            weight: 10.0 * distance,
-            color: (distance / 2.0) + BACKGROUND_COLOR,
+            weight: 20.0 * distance,
+            color: (distance / 2.0) + BACKGROUND_COLOR + 0.05,
             height: 0.0,
             relative_offset: 0.0,
             prev_point: None,
@@ -85,6 +85,7 @@ impl Branch {
             None => {
                 if let Some(prev_point) = self.prev_point {
                     draw.line()
+                        .caps_round()
                         .start(prev_point)
                         .end(Point2::new(
                             self.frond_center + self.original_offset + self.relative_offset,
@@ -179,6 +180,7 @@ impl Curl {
     fn view(&self, draw: &Draw) {
         if let Some(prev_point) = self.prev_point {
             draw.line()
+                .caps_round()
                 .start(prev_point)
                 .end(Point2::new(
                     self.starting_point.x + self.relative_position.x,
