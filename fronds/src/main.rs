@@ -49,10 +49,10 @@ fn model(app: &App) -> Model {
     let mut fronds = Vec::with_capacity(num_fronds);
     for _ in 0..num_fronds {
         let frond_position = rng.gen_range(-(WIDTH as f32) / 2.0..(WIDTH as f32) / 2.0);
-        let frond_distance = rng.gen();
+        let frond_closeness = rng.gen();
         fronds.push((
-            frond_distance,
-            Frond::new(frond_position, frond_distance, &mut rng),
+            frond_closeness,
+            Frond::new(frond_position, frond_closeness, &mut rng),
         ));
     }
 

@@ -54,7 +54,7 @@ pub struct Frond {
 }
 
 impl Frond {
-    pub fn new<R: Rng>(x: f32, distance: f32, rng: &mut R) -> Self {
+    pub fn new<R: Rng>(x: f32, closeness: f32, rng: &mut R) -> Self {
         let max_height = rng.gen_range(MIN_HEIGHT..MAX_HEIGHT);
         Frond {
             branches: vec![
@@ -62,37 +62,37 @@ impl Frond {
                     x,
                     -THIRD_BRANCH_OFFSET,
                     max_height * rng.gen::<f32>(),
-                    distance,
+                    closeness,
                 ),
                 Branch::new(
                     x,
                     -SECOND_BRANCH_OFFSET,
                     max_height * rng.gen::<f32>(),
-                    distance,
+                    closeness,
                 ),
                 Branch::new(
                     x,
                     -FIRST_BRANCH_OFFSET,
                     max_height * rng.gen::<f32>(),
-                    distance,
+                    closeness,
                 ),
                 Branch::new(
                     x,
                     FIRST_BRANCH_OFFSET,
                     max_height * rng.gen::<f32>(),
-                    distance,
+                    closeness,
                 ),
                 Branch::new(
                     x,
                     SECOND_BRANCH_OFFSET,
                     max_height * rng.gen::<f32>(),
-                    distance,
+                    closeness,
                 ),
                 Branch::new(
                     x,
                     THIRD_BRANCH_OFFSET,
                     max_height * rng.gen::<f32>(),
-                    distance,
+                    closeness,
                 ),
             ],
         }
@@ -125,13 +125,13 @@ struct Branch {
 }
 
 impl Branch {
-    fn new(frond_center: f32, original_offset: f32, max_height: f32, distance: f32) -> Self {
+    fn new(frond_center: f32, original_offset: f32, max_height: f32, closeness: f32) -> Self {
         Branch {
             frond_center,
             original_offset,
             max_height,
-            weight: MAX_WEIGHT * distance,
-            color: (distance * COLOR_RANGE) + BACKGROUND_COLOR + COLOR_PADDING,
+            weight: MAX_WEIGHT * closeness,
+            color: (closeness * COLOR_RANGE) + BACKGROUND_COLOR + COLOR_PADDING,
             height: 0.0,
             relative_offset: 0.0,
             prev_point: None,
