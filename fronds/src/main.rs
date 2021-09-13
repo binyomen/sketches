@@ -3,7 +3,7 @@ use {
     nannou::{app::App, draw::Draw, event::Update, frame::Frame},
     nannou_imageutil::capture::CaptureHelper,
     rand::{thread_rng, Rng},
-    std::{env, fs},
+    std::{env, fs, ops::Range},
 };
 
 const SIZE_DIVIDEND: u32 = if WIDTH == WIDTH_1 {
@@ -26,6 +26,16 @@ const SECONDS_PER_FROND: f32 = if WIDTH == WIDTH_1 {
 } else {
     0.0
 };
+
+const WIDTH_F32: f32 = WIDTH as f32;
+const QUADRANTS: [Range<f32>; 4] = [
+    -WIDTH_F32 / 2.0..-WIDTH_F32 / 4.0,
+    -WIDTH_F32 / 4.0..0.0,
+    0.0..WIDTH_F32 / 4.0,
+    WIDTH_F32 / 4.0..WIDTH_F32 / 2.0,
+];
+
+const FILE_NAME: &str = "fronds_4";
 
 struct Model {
     num_updates: u64,
@@ -56,14 +66,18 @@ fn model(app: &App) -> Model {
     let num_fronds = rng.gen_range(MIN_NUM_FRONDS..MAX_NUM_FRONDS);
     println!("Drawing {} fronds.", num_fronds);
 
+    let mut quadrant_index = 0;
+
     let mut fronds = Vec::with_capacity(num_fronds);
     for _ in 0..num_fronds {
-        let frond_position = rng.gen_range(-(WIDTH as f32) / 2.0..(WIDTH as f32) / 2.0);
+        let frond_position = rng.gen_range(QUADRANTS[quadrant_index].clone());
         let frond_closeness = rng.gen();
         fronds.push((
             frond_closeness,
             Frond::new(frond_position, frond_closeness, &mut rng),
         ));
+
+        quadrant_index = (quadrant_index + 1) % QUADRANTS.len();
     }
 
     fronds.sort_by(|(d1, _), (d2, _)| d2.partial_cmp(d1).unwrap());
@@ -131,9 +145,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
     model.capture_helper.display_in_window(&frame);
 
     if model.generation_complete && !model.file_written {
-        let path = capture_directory(app)
-            .join("fronds_3")
-            .with_extension("png");
+        let path = capture_directory(app).join(FILE_NAME).with_extension("png");
         model.capture_helper.write_to_file(path).unwrap();
 
         println!("File written.");
