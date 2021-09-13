@@ -54,7 +54,7 @@ pub struct Plant {
 }
 
 impl Plant {
-    pub fn new<R: Rng>(x: f32, closeness: f32, rng: &mut R) -> Self {
+    pub fn new(x: f32, closeness: f32, rng: &mut impl Rng) -> Self {
         let max_height = rng.gen_range(MIN_HEIGHT..MAX_HEIGHT);
         Plant {
             branches: vec![
