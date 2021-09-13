@@ -1,9 +1,9 @@
 use {
     fronds::{Frond, BACKGROUND_COLOR, HEIGHT, WIDTH, WIDTH_1, WIDTH_2, WIDTH_3},
-    nannou::{app::App, event::Update, frame::Frame},
+    nannou::{app::App, draw::Draw, event::Update, frame::Frame},
     nannou_imageutil::capture::CaptureHelper,
     rand::{thread_rng, Rng},
-    std::fs,
+    std::{env, fs},
 };
 
 const SIZE_DIVIDEND: u32 = if WIDTH == WIDTH_1 {
@@ -81,6 +81,10 @@ fn model(app: &App) -> Model {
 }
 
 fn update(_app: &App, model: &mut Model, _update: Update) {
+    process_update(model);
+}
+
+fn process_update(model: &mut Model) {
     // If we've already written out the file, we're done here.
     if model.file_written {
         return;
@@ -110,14 +114,17 @@ fn view(app: &App, model: &Model, frame: Frame) {
     }
 
     let draw = app.draw();
+    process_view(model, &draw);
 
-    if model.num_updates <= 1 {
-        draw.background()
-            .rgb(BACKGROUND_COLOR, BACKGROUND_COLOR, BACKGROUND_COLOR);
-    }
-
-    if let Some((_, frond)) = model.fronds.last() {
-        frond.view(&draw);
+    if env::args().nth(1) == Some("fast".to_owned()) {
+        let mut_model = unsafe { (model as *const Model as *mut Model).as_mut() }.unwrap();
+        for _ in 0..100 {
+            if model.generation_complete {
+                break;
+            }
+            process_update(mut_model);
+            process_view(model, &draw);
+        }
     }
 
     model.capture_helper.render_image(app, &draw);
@@ -130,6 +137,17 @@ fn view(app: &App, model: &Model, frame: Frame) {
         model.capture_helper.write_to_file(path).unwrap();
 
         println!("File written.");
+    }
+}
+
+fn process_view(model: &Model, draw: &Draw) {
+    if model.num_updates <= 1 {
+        draw.background()
+            .rgb(BACKGROUND_COLOR, BACKGROUND_COLOR, BACKGROUND_COLOR);
+    }
+
+    if let Some((_, frond)) = model.fronds.last() {
+        frond.view(draw);
     }
 }
 
