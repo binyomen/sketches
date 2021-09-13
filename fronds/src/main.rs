@@ -1,5 +1,5 @@
 use {
-    fronds::{Frond, BACKGROUND_COLOR, HEIGHT, WIDTH, WIDTH_1, WIDTH_2, WIDTH_3},
+    fronds::{Plant, BACKGROUND_COLOR, HEIGHT, WIDTH, WIDTH_1, WIDTH_2, WIDTH_3},
     nannou::{app::App, draw::Draw, event::Update, frame::Frame},
     nannou_imageutil::capture::CaptureHelper,
     rand::{thread_rng, Rng},
@@ -16,10 +16,10 @@ const SIZE_DIVIDEND: u32 = if WIDTH == WIDTH_1 {
     0
 };
 
-const MIN_NUM_FRONDS: usize = 12;
-const MAX_NUM_FRONDS: usize = 22;
+const MIN_NUM_PLANTS: usize = 12;
+const MAX_NUM_PLANTS: usize = 22;
 
-const SECONDS_PER_FROND: f32 = if WIDTH == WIDTH_1 {
+const SECONDS_PER_PLANT: f32 = if WIDTH == WIDTH_1 {
     10.0
 } else if WIDTH == WIDTH_2 || WIDTH == WIDTH_3 {
     15.0
@@ -39,7 +39,7 @@ const FILE_NAME: &str = "fronds_4";
 
 struct Model {
     num_updates: u64,
-    fronds: Vec<(f32, Frond)>,
+    plants: Vec<(f32, Plant)>,
     t: f32,
     generation_complete: bool,
     file_written: bool,
@@ -63,30 +63,30 @@ fn model(app: &App) -> Model {
 
     let mut rng = thread_rng();
 
-    let num_fronds = rng.gen_range(MIN_NUM_FRONDS..MAX_NUM_FRONDS);
-    println!("Drawing {} fronds.", num_fronds);
+    let num_plants = rng.gen_range(MIN_NUM_PLANTS..MAX_NUM_PLANTS);
+    println!("Drawing {} plants.", num_plants);
 
     let mut quadrant_index = 0;
 
-    let mut fronds = Vec::with_capacity(num_fronds);
-    for _ in 0..num_fronds {
-        let frond_position = rng.gen_range(QUADRANTS[quadrant_index].clone());
-        let frond_closeness = rng.gen();
-        fronds.push((
-            frond_closeness,
-            Frond::new(frond_position, frond_closeness, &mut rng),
+    let mut plants = Vec::with_capacity(num_plants);
+    for _ in 0..num_plants {
+        let plant_position = rng.gen_range(QUADRANTS[quadrant_index].clone());
+        let plant_closeness = rng.gen();
+        plants.push((
+            plant_closeness,
+            Plant::new(plant_position, plant_closeness, &mut rng),
         ));
 
         quadrant_index = (quadrant_index + 1) % QUADRANTS.len();
     }
 
-    fronds.sort_by(|(d1, _), (d2, _)| d2.partial_cmp(d1).unwrap());
+    plants.sort_by(|(d1, _), (d2, _)| d2.partial_cmp(d1).unwrap());
 
     fs::create_dir_all(&capture_directory(app)).unwrap();
 
     Model {
         num_updates: 0,
-        fronds,
+        plants,
         t: 0.0,
         generation_complete: false,
         file_written: false,
@@ -108,12 +108,12 @@ fn process_update(model: &mut Model) {
 
     let t = 1.0 / 60.0;
     model.t += t;
-    if model.t > SECONDS_PER_FROND {
+    if model.t > SECONDS_PER_PLANT {
         model.t = 0.0;
-        model.fronds.pop();
-        println!("{} fronds left.", model.fronds.len());
-    } else if let Some((_, frond)) = model.fronds.last_mut() {
-        frond.event(model.t);
+        model.plants.pop();
+        println!("{} plants left.", model.plants.len());
+    } else if let Some((_, plant)) = model.plants.last_mut() {
+        plant.event(model.t);
     } else if model.generation_complete {
         model.file_written = true;
     } else {
@@ -158,8 +158,8 @@ fn process_view(model: &Model, draw: &Draw) {
             .rgb(BACKGROUND_COLOR, BACKGROUND_COLOR, BACKGROUND_COLOR);
     }
 
-    if let Some((_, frond)) = model.fronds.last() {
-        frond.view(draw);
+    if let Some((_, plant)) = model.plants.last() {
+        plant.view(draw);
     }
 }
 

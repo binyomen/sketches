@@ -49,14 +49,14 @@ const CURL_DECAY_RATE: f32 = 0.7;
 const CURL_ANGULAR_FREQUENCY: f32 = PI;
 const CURL_PHASE_ANGLE: f32 = 0.0;
 
-pub struct Frond {
+pub struct Plant {
     branches: Vec<Branch>,
 }
 
-impl Frond {
+impl Plant {
     pub fn new<R: Rng>(x: f32, closeness: f32, rng: &mut R) -> Self {
         let max_height = rng.gen_range(MIN_HEIGHT..MAX_HEIGHT);
-        Frond {
+        Plant {
             branches: vec![
                 Branch::new(
                     x,
@@ -112,7 +112,7 @@ impl Frond {
 }
 
 struct Branch {
-    frond_center: f32,
+    plant_center: f32,
     original_offset: f32,
     max_height: f32,
     weight: f32,
@@ -125,9 +125,9 @@ struct Branch {
 }
 
 impl Branch {
-    fn new(frond_center: f32, original_offset: f32, max_height: f32, closeness: f32) -> Self {
+    fn new(plant_center: f32, original_offset: f32, max_height: f32, closeness: f32) -> Self {
         Branch {
-            frond_center,
+            plant_center,
             original_offset,
             max_height,
             weight: MAX_WEIGHT * closeness,
@@ -157,7 +157,7 @@ impl Branch {
                         .caps_round()
                         .start(prev_point)
                         .end(Point2::new(
-                            self.frond_center + self.original_offset + self.relative_offset,
+                            self.plant_center + self.original_offset + self.relative_offset,
                             WINDOW_BOTTOM + self.height,
                         ))
                         .weight(self.weight)
@@ -169,7 +169,7 @@ impl Branch {
 
     fn update_position(&mut self, t: f32) {
         self.prev_point = Some(Point2::new(
-            self.frond_center + self.original_offset + self.relative_offset,
+            self.plant_center + self.original_offset + self.relative_offset,
             WINDOW_BOTTOM + self.height,
         ));
 
@@ -193,7 +193,7 @@ impl Branch {
                 color: self.color,
                 direction_multiplier,
                 starting_point: Vec2::new(
-                    self.frond_center + self.original_offset + self.relative_offset,
+                    self.plant_center + self.original_offset + self.relative_offset,
                     WINDOW_BOTTOM + self.height,
                 ),
                 relative_position: Vec2::new(0.0, 0.0),
