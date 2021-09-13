@@ -111,9 +111,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     if model.generation_complete && !model.file_written {
         let path = capture_directory(app)
-            .join("fronds_2")
+            .join("fronds_3")
             .with_extension("png");
         model.capture_helper.write_to_file(path).unwrap();
+
+        println!("File written.");
     }
 }
 

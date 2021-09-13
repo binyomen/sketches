@@ -17,8 +17,8 @@ const WINDOW_BOTTOM: f32 = -((HEIGHT as f32) / 2.0);
 
 pub const BACKGROUND_COLOR: f32 = 0.116;
 
-const MIN_HEIGHT: f32 = (HEIGHT as f32) * 0.1;
-const MAX_HEIGHT: f32 = (HEIGHT as f32) * 0.9;
+const MIN_HEIGHT: f32 = (HEIGHT as f32) * 0.5;
+const MAX_HEIGHT: f32 = (HEIGHT as f32) * 1.5;
 
 const FIRST_BRANCH_OFFSET: f32 = (WIDTH as f32) * 0.00125;
 const SECOND_BRANCH_OFFSET: f32 = (WIDTH as f32) * 0.003125;
@@ -58,12 +58,42 @@ impl Frond {
         let max_height = rng.gen_range(MIN_HEIGHT..MAX_HEIGHT);
         Frond {
             branches: vec![
-                Branch::new(x, -THIRD_BRANCH_OFFSET, max_height, distance),
-                Branch::new(x, -SECOND_BRANCH_OFFSET, max_height, distance),
-                Branch::new(x, -FIRST_BRANCH_OFFSET, max_height, distance),
-                Branch::new(x, FIRST_BRANCH_OFFSET, max_height, distance),
-                Branch::new(x, SECOND_BRANCH_OFFSET, max_height, distance),
-                Branch::new(x, THIRD_BRANCH_OFFSET, max_height, distance),
+                Branch::new(
+                    x,
+                    -THIRD_BRANCH_OFFSET,
+                    max_height * rng.gen::<f32>(),
+                    distance,
+                ),
+                Branch::new(
+                    x,
+                    -SECOND_BRANCH_OFFSET,
+                    max_height * rng.gen::<f32>(),
+                    distance,
+                ),
+                Branch::new(
+                    x,
+                    -FIRST_BRANCH_OFFSET,
+                    max_height * rng.gen::<f32>(),
+                    distance,
+                ),
+                Branch::new(
+                    x,
+                    FIRST_BRANCH_OFFSET,
+                    max_height * rng.gen::<f32>(),
+                    distance,
+                ),
+                Branch::new(
+                    x,
+                    SECOND_BRANCH_OFFSET,
+                    max_height * rng.gen::<f32>(),
+                    distance,
+                ),
+                Branch::new(
+                    x,
+                    THIRD_BRANCH_OFFSET,
+                    max_height * rng.gen::<f32>(),
+                    distance,
+                ),
             ],
         }
     }
