@@ -4,8 +4,8 @@ use {
     std::f32::consts::{E, PI},
 };
 
-pub const WIDTH: u32 = 800;
-pub const HEIGHT: u32 = 500;
+pub const WIDTH: u32 = 2400;
+pub const HEIGHT: u32 = 1500;
 const WINDOW_BOTTOM: f32 = -((HEIGHT as f32) / 2.0);
 
 pub const BACKGROUND_COLOR: f32 = 0.116;
@@ -16,15 +16,15 @@ pub struct Frond {
 
 impl Frond {
     pub fn new<R: Rng>(x: f32, distance: f32, rng: &mut R) -> Self {
-        let max_height = rng.gen_range(50.0..450.0);
+        let max_height = rng.gen_range(150.0..1350.0);
         Frond {
             branches: vec![
-                Branch::new(x, -5.0, max_height, distance),
-                Branch::new(x, -2.5, max_height, distance),
-                Branch::new(x, -1.0, max_height, distance),
-                Branch::new(x, 1.0, max_height, distance),
-                Branch::new(x, 2.5, max_height, distance),
-                Branch::new(x, 5.0, max_height, distance),
+                Branch::new(x, -15.0, max_height, distance),
+                Branch::new(x, -7.5, max_height, distance),
+                Branch::new(x, -3.0, max_height, distance),
+                Branch::new(x, 3.0, max_height, distance),
+                Branch::new(x, 7.5, max_height, distance),
+                Branch::new(x, 15.0, max_height, distance),
             ],
         }
     }
@@ -61,7 +61,7 @@ impl Branch {
             frond_center,
             original_offset,
             max_height,
-            weight: 20.0 * distance,
+            weight: 60.0 * distance,
             color: (distance / 2.0) + BACKGROUND_COLOR + 0.05,
             height: 0.0,
             relative_offset: 0.0,
@@ -105,7 +105,7 @@ impl Branch {
         ));
 
         self.height += t;
-        self.relative_offset = (1.0 / 50.0) * self.original_offset * t.powi(4);
+        self.relative_offset = (1.0 / 600.0) * self.original_offset * t.powi(4);
 
         if self.height > self.max_height {
             self.t_before_curl = t;

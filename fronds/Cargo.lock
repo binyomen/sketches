@@ -674,6 +674,7 @@ name = "fronds"
 version = "0.1.0"
 dependencies = [
  "nannou",
+ "nannou_imageutil",
  "rand 0.8.4",
 ]
 
@@ -1465,6 +1466,14 @@ dependencies = [
  "num-traits",
  "palette",
  "rand 0.8.4",
+]
+
+[[package]]
+name = "nannou_imageutil"
+version = "0.1.0"
+source = "git+https://github.com/binyomen/nannou_imageutil#de64ccf25907ee87f6494e73b0ff7a63ee1a2ebd"
+dependencies = [
+ "nannou",
 ]
 
 [[package]]

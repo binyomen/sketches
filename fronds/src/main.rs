@@ -1,23 +1,28 @@
 use {
     fronds::{Frond, BACKGROUND_COLOR, HEIGHT, WIDTH},
     nannou::{app::App, event::Event, frame::Frame},
+    nannou_imageutil::capture::CaptureHelper,
     rand::{thread_rng, Rng},
+    std::fs,
 };
 
 struct Model {
     num_updates: u64,
     fronds: Vec<(f32, Frond)>,
     t: f32,
+    generation_complete: bool,
+    file_written: bool,
+    capture_helper: CaptureHelper,
 }
 
 fn main() {
-    nannou::app(model).event(event).view(view).run();
+    nannou::app(model).event(event).view(view).exit(exit).run();
 }
 
 fn model(app: &App) -> Model {
     app.new_window()
         .title("Fronds")
-        .size(WIDTH, HEIGHT)
+        .size(WIDTH / 3, HEIGHT / 3)
         .build()
         .unwrap();
 
@@ -36,24 +41,35 @@ fn model(app: &App) -> Model {
 
     fronds.sort_by(|(d1, _), (d2, _)| d2.partial_cmp(d1).unwrap());
 
+    fs::create_dir_all(&capture_directory(app)).unwrap();
+
     Model {
         num_updates: 0,
         fronds,
         t: 0.0,
+        generation_complete: false,
+        file_written: false,
+        capture_helper: CaptureHelper::from_main_window(app, [WIDTH, HEIGHT]),
     }
 }
 
 fn event(_app: &App, model: &mut Model, event: Event) {
-    if let Event::Update(update) = event {
+    if let Event::Update(_) = event {
         model.num_updates += 1;
 
-        let t = update.since_last.as_secs_f32();
+        let t = 1.0 / 60.0;
         model.t += t;
-        if model.t > 10.0 {
+        if model.t > 15.0 {
             model.t = 0.0;
             model.fronds.pop();
         } else if let Some((_, frond)) = model.fronds.last_mut() {
             frond.event(model.t);
+        } else {
+            if model.generation_complete {
+                model.file_written = true;
+            } else {
+                model.generation_complete = true;
+            }
         }
     }
 }
@@ -70,5 +86,23 @@ fn view(app: &App, model: &Model, frame: Frame) {
         frond.view(&draw);
     }
 
-    draw.to_frame(app, &frame).unwrap();
+    model.capture_helper.render_image(app, &draw);
+    model.capture_helper.display_in_window(&frame);
+
+    if model.generation_complete && !model.file_written {
+        let path = capture_directory(app)
+            .join("fronds_1")
+            .with_extension("png");
+        model.capture_helper.write_to_file(path).unwrap();
+    }
+}
+
+fn exit(app: &App, mut model: Model) {
+    model.capture_helper.close(app).unwrap();
+}
+
+fn capture_directory(app: &App) -> std::path::PathBuf {
+    app.project_path()
+        .expect("Could not locate project path.")
+        .join("outputs")
 }
