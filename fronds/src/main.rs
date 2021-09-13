@@ -1,9 +1,26 @@
 use {
-    fronds::{Frond, BACKGROUND_COLOR, HEIGHT, WIDTH},
+    fronds::{Frond, BACKGROUND_COLOR, HEIGHT, WIDTH, WIDTH_1, WIDTH_2, WIDTH_3},
     nannou::{app::App, event::Event, frame::Frame},
     nannou_imageutil::capture::CaptureHelper,
     rand::{thread_rng, Rng},
     std::fs,
+};
+
+const SIZE_DIVIDEND: u32 = if WIDTH == WIDTH_1 {
+    1
+} else if WIDTH == WIDTH_2 {
+    3
+} else if WIDTH == WIDTH_3 {
+    6
+} else {
+    0
+};
+const SECONDS_PER_FROND: f32 = if WIDTH == WIDTH_1 {
+    10.0
+} else if WIDTH == WIDTH_2 || WIDTH == WIDTH_3 {
+    15.0
+} else {
+    0.0
 };
 
 struct Model {
@@ -22,7 +39,7 @@ fn main() {
 fn model(app: &App) -> Model {
     app.new_window()
         .title("Fronds")
-        .size(WIDTH / 3, HEIGHT / 3)
+        .size(WIDTH / SIZE_DIVIDEND, HEIGHT / SIZE_DIVIDEND)
         .build()
         .unwrap();
 
@@ -59,17 +76,15 @@ fn event(_app: &App, model: &mut Model, event: Event) {
 
         let t = 1.0 / 60.0;
         model.t += t;
-        if model.t > 15.0 {
+        if model.t > SECONDS_PER_FROND {
             model.t = 0.0;
             model.fronds.pop();
         } else if let Some((_, frond)) = model.fronds.last_mut() {
             frond.event(model.t);
+        } else if model.generation_complete {
+            model.file_written = true;
         } else {
-            if model.generation_complete {
-                model.file_written = true;
-            } else {
-                model.generation_complete = true;
-            }
+            model.generation_complete = true;
         }
     }
 }
@@ -91,7 +106,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     if model.generation_complete && !model.file_written {
         let path = capture_directory(app)
-            .join("fronds_1")
+            .join("fronds_2")
             .with_extension("png");
         model.capture_helper.write_to_file(path).unwrap();
     }

@@ -4,11 +4,50 @@ use {
     std::f32::consts::{E, PI},
 };
 
-pub const WIDTH: u32 = 2400;
-pub const HEIGHT: u32 = 1500;
+pub const WIDTH_1: u32 = 800;
+pub const HEIGHT_1: u32 = 500;
+pub const WIDTH_2: u32 = 2400;
+pub const HEIGHT_2: u32 = 1500;
+pub const WIDTH_3: u32 = 4800;
+pub const HEIGHT_3: u32 = 3000;
+
+pub const WIDTH: u32 = WIDTH_3;
+pub const HEIGHT: u32 = HEIGHT_3;
 const WINDOW_BOTTOM: f32 = -((HEIGHT as f32) / 2.0);
 
 pub const BACKGROUND_COLOR: f32 = 0.116;
+
+const MIN_HEIGHT: f32 = (HEIGHT as f32) * 0.1;
+const MAX_HEIGHT: f32 = (HEIGHT as f32) * 0.9;
+
+const FIRST_BRANCH_OFFSET: f32 = (WIDTH as f32) * 0.00125;
+const SECOND_BRANCH_OFFSET: f32 = (WIDTH as f32) * 0.003125;
+const THIRD_BRANCH_OFFSET: f32 = (WIDTH as f32) * 0.00625;
+
+const MAX_WEIGHT: f32 = (WIDTH as f32) * 0.025;
+
+const BRANCH_WEIGHT_REDUCTION: f32 = 0.999;
+const CURL_WEIGHT_REDUCTION: f32 = 0.99;
+
+const COLOR_RANGE: f32 = 0.5;
+const COLOR_PADDING: f32 = 0.05;
+
+const OFFSET_CURVE_MULTIPLIER: f32 = if WIDTH == WIDTH_1 {
+    1.0 / 50.0
+} else if WIDTH == WIDTH_2 {
+    1.0 / 600.0
+} else if WIDTH == WIDTH_3 {
+    1.0 / 4800.0
+} else {
+    0.0
+};
+const OFFSET_CURVE_POWER: i32 = 4;
+
+const AMPLITUDE_MULTIPLIER: f32 = 10.0;
+
+const CURL_DECAY_RATE: f32 = 0.7;
+const CURL_ANGULAR_FREQUENCY: f32 = PI;
+const CURL_PHASE_ANGLE: f32 = 0.0;
 
 pub struct Frond {
     branches: Vec<Branch>,
@@ -16,15 +55,15 @@ pub struct Frond {
 
 impl Frond {
     pub fn new<R: Rng>(x: f32, distance: f32, rng: &mut R) -> Self {
-        let max_height = rng.gen_range(150.0..1350.0);
+        let max_height = rng.gen_range(MIN_HEIGHT..MAX_HEIGHT);
         Frond {
             branches: vec![
-                Branch::new(x, -15.0, max_height, distance),
-                Branch::new(x, -7.5, max_height, distance),
-                Branch::new(x, -3.0, max_height, distance),
-                Branch::new(x, 3.0, max_height, distance),
-                Branch::new(x, 7.5, max_height, distance),
-                Branch::new(x, 15.0, max_height, distance),
+                Branch::new(x, -THIRD_BRANCH_OFFSET, max_height, distance),
+                Branch::new(x, -SECOND_BRANCH_OFFSET, max_height, distance),
+                Branch::new(x, -FIRST_BRANCH_OFFSET, max_height, distance),
+                Branch::new(x, FIRST_BRANCH_OFFSET, max_height, distance),
+                Branch::new(x, SECOND_BRANCH_OFFSET, max_height, distance),
+                Branch::new(x, THIRD_BRANCH_OFFSET, max_height, distance),
             ],
         }
     }
@@ -61,8 +100,8 @@ impl Branch {
             frond_center,
             original_offset,
             max_height,
-            weight: 60.0 * distance,
-            color: (distance / 2.0) + BACKGROUND_COLOR + 0.05,
+            weight: MAX_WEIGHT * distance,
+            color: (distance * COLOR_RANGE) + BACKGROUND_COLOR + COLOR_PADDING,
             height: 0.0,
             relative_offset: 0.0,
             prev_point: None,
@@ -72,7 +111,7 @@ impl Branch {
     }
 
     fn event(&mut self, t: f32) {
-        self.weight *= 0.999;
+        self.weight *= BRANCH_WEIGHT_REDUCTION;
         match &mut self.curl {
             Some(curl) => curl.event(t - self.t_before_curl),
             None => self.update_position(t),
@@ -105,7 +144,8 @@ impl Branch {
         ));
 
         self.height += t;
-        self.relative_offset = (1.0 / 600.0) * self.original_offset * t.powi(4);
+        self.relative_offset =
+            OFFSET_CURVE_MULTIPLIER * self.original_offset * t.powi(OFFSET_CURVE_POWER);
 
         if self.height > self.max_height {
             self.t_before_curl = t;
@@ -118,7 +158,7 @@ impl Branch {
                 0.0
             };
             self.curl = Some(Curl {
-                amplitude: self.original_offset.abs() * 10.0,
+                amplitude: self.original_offset.abs() * AMPLITUDE_MULTIPLIER,
                 weight: self.weight,
                 color: self.color,
                 direction_multiplier,
@@ -150,28 +190,25 @@ impl Curl {
             self.starting_point.y + self.relative_position.y,
         ));
 
-        self.weight *= 0.99;
+        self.weight *= CURL_WEIGHT_REDUCTION;
 
         // See https://en.wikipedia.org/wiki/Damping#Damped_sine_wave and
         // https://mathworld.wolfram.com/LogarithmicSpiral.html
-        const DECAY_RATE: f32 = 0.7;
-        const ANGULAR_FREQUENCY: f32 = PI;
-        const PHASE_ANGLE: f32 = 0.0;
         let function_output = damped_function_cos(
             t,
             self.amplitude,
-            DECAY_RATE,
-            ANGULAR_FREQUENCY,
-            PHASE_ANGLE,
+            CURL_DECAY_RATE,
+            CURL_ANGULAR_FREQUENCY,
+            CURL_PHASE_ANGLE,
         );
 
         let x = self.direction_multiplier * -(function_output - self.amplitude);
         let y = damped_function_sin(
             t,
             self.amplitude,
-            DECAY_RATE,
-            ANGULAR_FREQUENCY,
-            PHASE_ANGLE,
+            CURL_DECAY_RATE,
+            CURL_ANGULAR_FREQUENCY,
+            CURL_PHASE_ANGLE,
         );
 
         self.relative_position = Vec2::new(x, y);
