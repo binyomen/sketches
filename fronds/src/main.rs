@@ -1,6 +1,6 @@
 use {
     fronds::{Frond, BACKGROUND_COLOR, HEIGHT, WIDTH, WIDTH_1, WIDTH_2, WIDTH_3},
-    nannou::{app::App, event::Event, frame::Frame},
+    nannou::{app::App, event::Update, frame::Frame},
     nannou_imageutil::capture::CaptureHelper,
     rand::{thread_rng, Rng},
     std::fs,
@@ -37,7 +37,11 @@ struct Model {
 }
 
 fn main() {
-    nannou::app(model).event(event).view(view).exit(exit).run();
+    nannou::app(model)
+        .update(update)
+        .view(view)
+        .exit(exit)
+        .run();
 }
 
 fn model(app: &App) -> Model {
@@ -76,28 +80,26 @@ fn model(app: &App) -> Model {
     }
 }
 
-fn event(_app: &App, model: &mut Model, event: Event) {
-    if let Event::Update(_) = event {
-        // If we've already written out the file, we're done here.
-        if model.file_written {
-            return;
-        }
+fn update(_app: &App, model: &mut Model, _update: Update) {
+    // If we've already written out the file, we're done here.
+    if model.file_written {
+        return;
+    }
 
-        model.num_updates += 1;
+    model.num_updates += 1;
 
-        let t = 1.0 / 60.0;
-        model.t += t;
-        if model.t > SECONDS_PER_FROND {
-            model.t = 0.0;
-            model.fronds.pop();
-            println!("{} fronds left.", model.fronds.len());
-        } else if let Some((_, frond)) = model.fronds.last_mut() {
-            frond.event(model.t);
-        } else if model.generation_complete {
-            model.file_written = true;
-        } else {
-            model.generation_complete = true;
-        }
+    let t = 1.0 / 60.0;
+    model.t += t;
+    if model.t > SECONDS_PER_FROND {
+        model.t = 0.0;
+        model.fronds.pop();
+        println!("{} fronds left.", model.fronds.len());
+    } else if let Some((_, frond)) = model.fronds.last_mut() {
+        frond.event(model.t);
+    } else if model.generation_complete {
+        model.file_written = true;
+    } else {
+        model.generation_complete = true;
     }
 }
 
