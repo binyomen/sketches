@@ -15,6 +15,10 @@ const SIZE_DIVIDEND: u32 = if WIDTH == WIDTH_1 {
 } else {
     0
 };
+
+const MIN_NUM_FRONDS: usize = 12;
+const MAX_NUM_FRONDS: usize = 22;
+
 const SECONDS_PER_FROND: f32 = if WIDTH == WIDTH_1 {
     10.0
 } else if WIDTH == WIDTH_2 || WIDTH == WIDTH_3 {
@@ -45,7 +49,9 @@ fn model(app: &App) -> Model {
 
     let mut rng = thread_rng();
 
-    let num_fronds = rng.gen_range(12..22);
+    let num_fronds = rng.gen_range(MIN_NUM_FRONDS..MAX_NUM_FRONDS);
+    println!("Drawing {} fronds.", num_fronds);
+
     let mut fronds = Vec::with_capacity(num_fronds);
     for _ in 0..num_fronds {
         let frond_position = rng.gen_range(-(WIDTH as f32) / 2.0..(WIDTH as f32) / 2.0);
@@ -79,6 +85,7 @@ fn event(_app: &App, model: &mut Model, event: Event) {
         if model.t > SECONDS_PER_FROND {
             model.t = 0.0;
             model.fronds.pop();
+            println!("{} fronds left.", model.fronds.len());
         } else if let Some((_, frond)) = model.fronds.last_mut() {
             frond.event(model.t);
         } else if model.generation_complete {
