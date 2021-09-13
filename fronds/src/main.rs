@@ -90,6 +90,11 @@ fn event(_app: &App, model: &mut Model, event: Event) {
 }
 
 fn view(app: &App, model: &Model, frame: Frame) {
+    // If we've already written out the file, we're done here.
+    if model.file_written {
+        return;
+    }
+
     let draw = app.draw();
 
     if model.num_updates <= 1 {
