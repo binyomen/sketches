@@ -78,6 +78,11 @@ fn model(app: &App) -> Model {
 
 fn event(_app: &App, model: &mut Model, event: Event) {
     if let Event::Update(_) = event {
+        // If we've already written out the file, we're done here.
+        if model.file_written {
+            return;
+        }
+
         model.num_updates += 1;
 
         let t = 1.0 / 60.0;
