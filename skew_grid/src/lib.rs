@@ -1,5 +1,9 @@
 use {
-    nannou::{color::rgb, draw::Draw, geom::Vec2},
+    nannou::{
+        color::{rgb, rgb::Rgb},
+        draw::Draw,
+        geom::Vec2,
+    },
     rand::{thread_rng, Rng},
 };
 
@@ -30,7 +34,7 @@ impl Grid {
         let mut rng = thread_rng();
         let points = generate_points(&mut rng);
         Grid {
-            cells: generate_cells(&points),
+            cells: generate_cells(&points, &mut rng),
             points,
         }
     }
@@ -85,7 +89,7 @@ fn generate_points(rng: &mut impl Rng) -> Vec<Vec<Point>> {
     point_rows
 }
 
-fn generate_cells(points: &[Vec<Point>]) -> Vec<Vec<Cell>> {
+fn generate_cells(points: &[Vec<Point>], rng: &mut impl Rng) -> Vec<Vec<Cell>> {
     let mut cell_rows = Vec::with_capacity(NUM_CELLS_Y as usize);
     for j in 0..cell_rows.capacity() {
         let mut cell_row = Vec::with_capacity(NUM_CELLS_X as usize);
@@ -95,6 +99,7 @@ fn generate_cells(points: &[Vec<Point>]) -> Vec<Vec<Cell>> {
                 top_right: points[j][i + 1],
                 bottom_right: points[j + 1][i + 1],
                 bottom_left: points[j + 1][i],
+                color: create_cell_color(rng),
             });
         }
 
@@ -104,6 +109,10 @@ fn generate_cells(points: &[Vec<Point>]) -> Vec<Vec<Cell>> {
 
     debug_assert_eq!(cell_rows.len(), NUM_CELLS_Y as usize);
     cell_rows
+}
+
+fn create_cell_color(rng: &mut impl Rng) -> Rgb {
+    rgb(rng.gen::<f32>(), rng.gen::<f32>(), rng.gen::<f32>())
 }
 
 #[derive(Clone, Copy)]
@@ -132,12 +141,13 @@ struct Cell {
     top_right: Point,
     bottom_right: Point,
     bottom_left: Point,
+    color: Rgb,
 }
 
 impl Cell {
     fn view(&self, draw: &Draw) {
         draw.polygon()
-            .no_fill()
+            .color(self.color)
             .stroke_color(rgb(1.0, 1.0, 1.0))
             .stroke_weight(2.0)
             .points([
