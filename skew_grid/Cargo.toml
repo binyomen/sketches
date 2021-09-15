@@ -1,0 +1,9 @@
+[package]
+name = "skew_grid"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+nannou = "0.17.1"
+nannou_imageutil = { git = "https://github.com/binyomen/nannou_imageutil" }
+rand = "0.8.4"
