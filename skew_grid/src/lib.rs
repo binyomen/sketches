@@ -8,10 +8,12 @@ use {
 };
 
 pub const WIDTH_1: u32 = 600;
-const HEIGHT_1: u32 = 600;
+pub const HEIGHT_1: u32 = 600;
+pub const WIDTH_2: u32 = 3600;
+pub const HEIGHT_2: u32 = 3600;
 
-pub const WIDTH: u32 = WIDTH_1;
-pub const HEIGHT: u32 = HEIGHT_1;
+pub const WIDTH: u32 = WIDTH_2;
+pub const HEIGHT: u32 = HEIGHT_2;
 
 const HALF_WIDTH: u32 = WIDTH / 2;
 const HALF_HEIGHT: u32 = HEIGHT / 2;
@@ -22,6 +24,9 @@ const CELL_WIDTH: f32 = (WIDTH as f32) / (NUM_CELLS_X as f32);
 const CELL_HEIGHT: f32 = (HEIGHT as f32) / (NUM_CELLS_Y as f32);
 const QUARTER_CELL_WIDTH: f32 = CELL_WIDTH / 4.0;
 const QUARTER_CELL_HEIGHT: f32 = CELL_HEIGHT / 4.0;
+
+const POINT_RADIUS: f32 = (WIDTH as f32) / 120.0;
+const LINE_WEIGHT: f32 = (WIDTH as f32) / 300.0;
 
 #[derive(Default)]
 pub struct Grid {
@@ -125,7 +130,7 @@ impl Point {
     fn view(&self, draw: &Draw) {
         draw.ellipse()
             .x_y(self.x, self.y)
-            .radius(5.0)
+            .radius(POINT_RADIUS)
             .rgb(1.0, 1.0, 1.0);
     }
 }
@@ -149,7 +154,7 @@ impl Cell {
         draw.polygon()
             .color(self.color)
             .stroke_color(rgb(1.0, 1.0, 1.0))
-            .stroke_weight(2.0)
+            .stroke_weight(LINE_WEIGHT)
             .points([
                 self.top_left,
                 self.top_right,

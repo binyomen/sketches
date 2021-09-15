@@ -4,11 +4,19 @@ use {
         frame::Frame,
     },
     nannou_imageutil::capture::CaptureHelper,
-    skew_grid::{Grid, HEIGHT, WIDTH, WIDTH_1},
+    skew_grid::{Grid, HEIGHT, WIDTH, WIDTH_1, WIDTH_2},
     std::{fs, path::PathBuf},
 };
 
-const SIZE_DIVIDEND: u32 = if WIDTH == WIDTH_1 { 1 } else { 0 };
+const SIZE_DIVIDEND: u32 = if WIDTH == WIDTH_1 {
+    1
+} else if WIDTH == WIDTH_2 {
+    6
+} else {
+    0
+};
+
+const FILE_NAME: &str = "skew_grid_2";
 
 struct Model {
     capture_helper: CaptureHelper,
@@ -44,9 +52,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
     model.capture_helper.render_image(app, &draw);
     model.capture_helper.display_in_window(&frame);
 
-    let path = capture_directory(app)
-        .join("skew_grid_1")
-        .with_extension("png");
+    let path = capture_directory(app).join(FILE_NAME).with_extension("png");
     model.capture_helper.write_to_file(path).unwrap();
 }
 
