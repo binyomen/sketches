@@ -3,7 +3,7 @@ use {
     nannou::{app::App, draw::Draw, event::Update, frame::Frame},
     nannou_imageutil::capture::CaptureHelper,
     rand::{thread_rng, Rng},
-    std::{env, fs, ops::Range},
+    std::{env, fs, ops::Range, path::PathBuf},
 };
 
 const SIZE_DIVIDEND: u32 = if WIDTH == WIDTH_1 {
@@ -167,7 +167,7 @@ fn exit(app: &App, mut model: Model) {
     model.capture_helper.close(app).unwrap();
 }
 
-fn capture_directory(app: &App) -> std::path::PathBuf {
+fn capture_directory(app: &App) -> PathBuf {
     app.project_path()
         .expect("Could not locate project path.")
         .join("outputs")
